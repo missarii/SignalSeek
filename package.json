@@ -1,0 +1,1 @@
+{"name": "signalseek","private": true,"version": "0.1.0","workspaces": ["apps/web","apps/api","packages/shared-types","packages/config"],"scripts": {"test": "npm run test --workspaces --if-present","build": "npm run build --workspaces --if-present"}}
