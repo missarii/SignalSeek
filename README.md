@@ -19,3 +19,21 @@ The core differentiator is **provenance over fluency**: stable `[Sn]` citations,
 - Checkpointed runs with safe resume: re-running never duplicates reports, sources, or graph edges
 
 **Evidence & verification**
+- Full chain: Source → Snapshot → Passage (with `chunk-N` locators) → Evidence (quote, method, result) → Claim links
+- Evidence statuses: Supported / Partially supported / Contradicted / Insufficient / Not evaluated
+- Contradiction detection with honest classification: genuine vs different dates, scopes, definitions, opinions, or incomplete info — both sides stored, newest/popular never auto-preferred
+- Citation validation: every `[Sn]` must resolve to a persisted source or the report carries an explicit caveat
+
+**Knowledge graph**
+- Entities (Organization, Person, Product, Technology, Event, Location, Dataset, Research paper, Concept) with normalized-name dedupe — never auto-merges people/orgs sharing a name
+- Relationships extracted from evidence, each edge linked to its supporting quote; Cytoscape.js visualization with zoom, pan, selection, filters
+
+**Monitoring & reports**
+- Trend monitors (daily/weekly) with baseline snapshots, new/changed/removed/conflicting finding detection, in-app alerts, pause/resume/history
+- Reports with executive summary, key/detailed findings, conflicts, timeline, entities, limitations, unanswered questions, references + retrieval dates; Markdown/HTML/PDF export and version history
+
+**Platform**
+- Auth (JWT + rotating refresh, Argon2id), workspaces, OWNER/ADMIN/ANALYST/VIEWER RBAC enforced server-side
+- Live SSE progress with typed, persisted, replayable events; provider health dashboard with masked secrets
+- Docker Compose one-command stack; deterministic keyless demo mode; CI gating types, tests, and builds
+
