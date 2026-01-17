@@ -14,3 +14,8 @@ The core differentiator is **provenance over fluency**: stable `[Sn]` citations,
 
 **Agentic research**
 - Natural-language question → structured `ResearchPlan` (objective, subquestions, search queries, source categories, budgets)
+- Bounded iterative loop: max 4 search rounds / 20 queries / 50 sources / wall-clock deadline by default — all configurable, validated, and visible
+- Query normalization + deduplication, canonical URL handling, content hashing, gap-driven follow-up queries
+- Checkpointed runs with safe resume: re-running never duplicates reports, sources, or graph edges
+
+**Evidence & verification**
