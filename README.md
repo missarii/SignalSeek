@@ -37,3 +37,28 @@ The core differentiator is **provenance over fluency**: stable `[Sn]` citations,
 - Live SSE progress with typed, persisted, replayable events; provider health dashboard with masked secrets
 - Docker Compose one-command stack; deterministic keyless demo mode; CI gating types, tests, and builds
 
+## Architecture
+
+```
+apps/web (Next.js 14) ──REST/SSE──> apps/api (NestJS 10) ──auth HTTP──> apps/agent (FastAPI)
+        │                              │ Prisma ORM                       │ bounded research loop
+        │                              ▼                                  ▼
+        │                         PostgreSQL + pgvector              Tavily / Brave / RSS / mock
+        │                         Redis (jobs/cache)                 OpenAI-compat / Ollama / mock
+        └─ Cytoscape graph, SSE timeline, citations, exports (md/html/pdf)
+```
+
+See [`docs/ARCHITECTURE.md`](signalseek/docs/ARCHITECTURE.md), [`docs/AGENT_WORKFLOW.md`](signalseek/docs/AGENT_WORKFLOW.md),
+[`docs/DATA_MODEL.md`](signalseek/docs/DATA_MODEL.md), [`docs/API.md`](signalseek/docs/API.md),
+[`docs/SECURITY.md`](signalseek/docs/SECURITY.md), [`docs/PROVIDERS.md`](signalseek/docs/PROVIDERS.md),
+[`docs/RESEARCH_EVALUATION.md`](signalseek/docs/RESEARCH_EVALUATION.md).
+
+## Technology stack
+
+| Layer | Technologies |
+|---|---|
+| Frontend (`apps/web`) | Next.js 14 (App Router), React 18, TypeScript strict, Tailwind CSS, TanStack Query, Zustand, React Hook Form, Zod, Recharts, Cytoscape.js, SSE live updates |
+| Product API (`apps/api`) | NestJS 10, TypeScript strict, Prisma ORM, PostgreSQL, Redis, JWT + rotating refresh, Argon2id, Swagger/OpenAPI, class-validator, Helmet, API throttling |
+| Agent engine (`apps/agent`) | Python 3.12, FastAPI, Pydantic, httpx, tenacity, trafilatura, BeautifulSoup, feedparser, pytest, Ruff |
+| Data & infra | PostgreSQL 16 + pgvector, Redis 7, Docker Compose, GitHub Actions, OpenTelemetry-compatible tracing, structured JSON logs |
+| Providers | Tavily / Brave / RSS-Atom / deterministic mock search; OpenAI-compatible / Ollama / mock LLM |
