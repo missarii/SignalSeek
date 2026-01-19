@@ -62,3 +62,19 @@ See [`docs/ARCHITECTURE.md`](signalseek/docs/ARCHITECTURE.md), [`docs/AGENT_WORK
 | Agent engine (`apps/agent`) | Python 3.12, FastAPI, Pydantic, httpx, tenacity, trafilatura, BeautifulSoup, feedparser, pytest, Ruff |
 | Data & infra | PostgreSQL 16 + pgvector, Redis 7, Docker Compose, GitHub Actions, OpenTelemetry-compatible tracing, structured JSON logs |
 | Providers | Tavily / Brave / RSS-Atom / deterministic mock search; OpenAI-compatible / Ollama / mock LLM |
+
+## Repository structure
+
+```
+signalseek/
+  apps/web/        # Next.js dashboard (investigations, evidence, reports, graph, monitors)
+  apps/api/        # NestJS product API (auth, workspaces, RBAC, jobs, exports) + Prisma seed
+  apps/agent/      # FastAPI research engine (planning, search, retrieval, claims, synthesis)
+    app/           # config, schemas, utils, security, providers_*, retrieval, workflow, run_research, main
+    tests/         # 8 pytest cases (URLs, SSRF, chunking, plans, contradictions)
+  packages/shared-types/  # typed SSE event contract shared by API + web
+  packages/config/        # shared TS base config
+  prisma/          # source-of-truth schema (28 models) + initial migration
+  docs/            # architecture, workflow, data model, API, security, providers, evaluation, …
+  scripts/         # benchmark spec + regression driver
+  docker-compose.yml  .env.example  Makefile  .github/workflows/ci.yml
