@@ -97,3 +97,22 @@ START → analyze_question → create_research_plan → execute_searches
 3. **Normalize & retrieve** — URLs are canonicalized (lowercased host, sorted query, tracking params stripped), then fetched behind an SSRF guard (`security.py`: scheme/host allowlist, DNS→public-IP revalidation, 15s timeout, 2MB cap, trafilatura→BeautifulSoup→raw chain). Failures are stored as `extraction_failed`, never papered over.
 4. **Extract** — pages are split into overlapping chunks (1200 chars / 200 overlap) with `chunk-N` locators; sentence-level claims are ranked so figure-bearing sentences surface first; entities come from capitalized-phrase extraction with normalized-name dedupe.
 5. **Evaluate & contradict** — each claim links to its passage and source; numeric-figure pairs are classified as genuine / different-dates / different-scope / different-definitions / opinion / incomplete — both sides preserved, recency/popularity never auto-wins.
+6. **Close the gaps** — subquestion keyword coverage decides whether ≤2 follow-up queries are issued, still inside the configured budgets.
+7. **Synthesize & persist** — the report is generated *only* from persisted evidence; `[Sn]` keys are validated against stored citations (mismatches append an explicit caveat); checkpoints make resume idempotent.
+
+Every transition emits a typed, persisted SSE event (`plan.created`, `search.started`, `source.retrieved`, `claim.extracted`, `contradiction.detected`, `research_gap.detected`, `report.completed`, …) defined once in `packages/shared-types` and consumed by both API and web — auditable, replayable, and free of private chain-of-thought.
+
+## Application pages
+
+| Page | What the reviewer sees working |
+|---|---|
+| Overview | Recent investigations, statuses, reports, monitors, alerts, usage, provider health — with honest empty states |
+| New Investigation | Question, description, depth, budgets, auto-plan — validated via DTOs |
+| Investigation Details | Plan, live SSE timeline, queries executed, source feed, evidence counts, contradictions, gaps, budget, cancel/resume |
+| Reports | Search/filter, citation navigation, evidence inspector, md/html/pdf export, version history |
+| Source Explorer | Metadata, canonical URL, hashes, retrieval/publication times, passages, related claims |
+| Evidence Explorer | Claim text, supporting vs contradictory sources, assessment history, verification status |
+| Knowledge Graph | Cytoscape zoom/pan/selection, type + time filters, per-edge evidence panel |
+| Trend Monitor | Create/edit monitors, baseline snapshots, change timeline, alert details, pause/resume |
+| Integrations | Search/LLM/RSS status, model config, connection testing, masked secrets |
+| Settings & Admin | Profile, workspaces, roles, usage/budgets, audit logs, queue health (server-side authorized) |
