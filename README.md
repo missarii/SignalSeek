@@ -116,3 +116,14 @@ Every transition emits a typed, persisted SSE event (`plan.created`, `search.sta
 | Trend Monitor | Create/edit monitors, baseline snapshots, change timeline, alert details, pause/resume |
 | Integrations | Search/LLM/RSS status, model config, connection testing, masked secrets |
 | Settings & Admin | Profile, workspaces, roles, usage/budgets, audit logs, queue health (server-side authorized) |
+
+## Quickstart (Docker Compose)
+
+```bash
+cp signalseek/.env.example signalseek/.env
+docker-compose -f signalseek/docker-compose.yml up --build
+# web http://localhost:3000 · api http://localhost:4000/api/docs · agent http://localhost:8001/health/live
+docker-compose -f signalseek/docker-compose.yml exec api npx prisma migrate deploy
+docker-compose -f signalseek/docker-compose.yml exec api npm run seed   # labeled demo data
+```
+
