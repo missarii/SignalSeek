@@ -127,3 +127,18 @@ docker-compose -f signalseek/docker-compose.yml exec api npx prisma migrate depl
 docker-compose -f signalseek/docker-compose.yml exec api npm run seed   # labeled demo data
 ```
 
+Works with **no paid keys**: `SEARCH_PROVIDER=mock`, `LLM_PROVIDER=mock` (deterministic, clearly labeled demo content).
+Real providers: set `SEARCH_PROVIDER=tavily` + `TAVILY_API_KEY`, or `brave` + `BRAVE_SEARCH_API_KEY`;
+`LLM_PROVIDER=openai|ollama` with `LLM_API_KEY`/`LLM_BASE_URL`/`LLM_MODEL`. Unconfigured integrations show an actionable message — never silent fabrications.
+
+**Environment** (see `signalseek/.env.example`): `NODE_ENV, WEB_PORT, API_PORT, AGENT_PORT, DATABASE_URL, REDIS_URL,
+JWT_ACCESS_SECRET, JWT_REFRESH_SECRET, APP_BASE_URL, API_BASE_URL, AGENT_INTERNAL_URL, AGENT_INTERNAL_AUTH_SECRET,
+SEARCH_PROVIDER, TAVILY_API_KEY, BRAVE_SEARCH_API_KEY, LLM_PROVIDER, LLM_API_KEY, LLM_BASE_URL, LLM_MODEL,
+EMBEDDING_PROVIDER, EMBEDDING_MODEL, EMBEDDING_DIMENSIONS, MAX_RESEARCH_ROUNDS, MAX_SEARCH_QUERIES,
+MAX_SOURCES_PER_INVESTIGATION, MAX_INVESTIGATION_DURATION_SECONDS, MAX_LLM_TOKENS, MAX_INVESTIGATION_COST, LOG_LEVEL`.
+Server-only secrets are never exposed to the browser; startup validates missing/malformed config with actionable errors.
+
+## Demo flow (copy-paste for reviewers)
+
+1. Register → create workspace (or log in with seeded `demo@signalseek.local` / `demo-password-123` — seed data only, never a production secret).
+2. Start investigation: *"What is the adoption of open RAN among European telecom operators?"*
