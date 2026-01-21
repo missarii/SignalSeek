@@ -78,3 +78,22 @@ signalseek/
   docs/            # architecture, workflow, data model, API, security, providers, evaluation, …
   scripts/         # benchmark spec + regression driver
   docker-compose.yml  .env.example  Makefile  .github/workflows/ci.yml
+```
+
+## How the agent works
+
+```
+START → analyze_question → create_research_plan → execute_searches
+  → normalize_and_deduplicate → retrieve_relevant_content
+  → extract_claims_and_entities → evaluate_evidence → identify_research_gaps
+  → sufficient_evidence? ──no──→ generate_followup_queries ──→ execute_searches
+                         └──yes─→ synthesize_report → persist_report
+  → update_knowledge_graph → emit_completion → END
+  (+ error / cancellation / timeout / exhausted-budget exits at every step)
+```
+
+1. **Analyze & plan** — the question is validated and decomposed into ≤5 subquestions plus deduplicated search queries (`apps/agent/app/workflow.py::analyze_question`). Budgets (rounds, queries, sources, wall-clock, tokens, cost) are attached to the plan and shown in the UI.
+2. **Search** — batched queries (5/round) go through the provider registry (`providers_search.py`); near-duplicate normalized queries are skipped and provider/latency recorded.
+3. **Normalize & retrieve** — URLs are canonicalized (lowercased host, sorted query, tracking params stripped), then fetched behind an SSRF guard (`security.py`: scheme/host allowlist, DNS→public-IP revalidation, 15s timeout, 2MB cap, trafilatura→BeautifulSoup→raw chain). Failures are stored as `extraction_failed`, never papered over.
+4. **Extract** — pages are split into overlapping chunks (1200 chars / 200 overlap) with `chunk-N` locators; sentence-level claims are ranked so figure-bearing sentences surface first; entities come from capitalized-phrase extraction with normalized-name dedupe.
+5. **Evaluate & contradict** — each claim links to its passage and source; numeric-figure pairs are classified as genuine / different-dates / different-scope / different-definitions / opinion / incomplete — both sides preserved, recency/popularity never auto-wins.
