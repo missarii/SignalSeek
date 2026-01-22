@@ -162,3 +162,14 @@ SSRF protection (DNS→IP revalidation, metadata/loopback blocks), prompt-inject
 
 ## Tests & evaluation
 
+```bash
+cd signalseek/apps/agent && python -m pytest -q        # 8 tests: URLs, SSRF, chunking, plans, contradictions
+cd signalseek/apps/api && npx tsc --noEmit             # strict TS
+cd signalseek/apps/web && npx tsc --noEmit
+```
+
+Benchmark: [`signalseek/scripts/benchmark.md`](signalseek/scripts/benchmark.md) compares the bounded agent vs single-round baseline on recall, citation correctness, contradiction precision, cost.
+
+## Screenshots
+
+> Add PNGs under `signalseek/docs/assets/` and reference them here — suggested captures:
