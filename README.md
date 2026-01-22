@@ -142,3 +142,23 @@ Server-only secrets are never exposed to the browser; startup validates missing/
 
 1. Register → create workspace (or log in with seeded `demo@signalseek.local` / `demo-password-123` — seed data only, never a production secret).
 2. Start investigation: *"What is the adoption of open RAN among European telecom operators?"*
+3. Watch SSE events: `plan.created → search.started → source.retrieved → claim.extracted → contradiction.detected → report.completed`
+4. Open claims (evidence links), contradictions (`different-scope`: 41% global vs 27% EU), graph, and the cited report; export md/html/pdf.
+
+## API overview (`/api/v1`, Swagger at `/api/docs`)
+
+- **Auth**: `POST /auth/register|login|refresh|logout`, `GET /auth/me`
+- **Workspaces**: `GET/POST /workspaces`, `GET /workspaces/:id`, `GET /workspaces/:id/members`
+- **Investigations**: `POST /workspaces/:id/investigations`, `GET /workspaces/:id/investigations`, `GET /investigations/:id`, `POST /investigations/:id/start|cancel|resume`, `GET /investigations/:id/events|events/stream|sources|evidence|graph`
+- **Reports**: `GET /workspaces/:id/reports`, `GET /reports/:id|/versions|/export?format=markdown|html|pdf`
+- **Evidence**: `GET /sources/:id`, `GET /claims/:id`
+- **Monitoring**: `POST/GET /workspaces/:id/monitors`, `GET/PATCH /monitors/:id`, `POST /monitors/:id/pause|resume`, `GET /monitors/:id/history`, `GET /workspaces/:id/alerts`
+- **System**: `GET /integrations`, `GET /health/live|ready`, `GET /metrics`
+- Full endpoint table + conventions in [`signalseek/docs/API.md`](signalseek/docs/API.md); data model in [`signalseek/docs/DATA_MODEL.md`](signalseek/docs/DATA_MODEL.md).
+
+## Security highlights
+
+SSRF protection (DNS→IP revalidation, metadata/loopback blocks), prompt-injection defenses (untrusted content delimited, strict tool allowlist, no code exec), Argon2id + rotating refresh tokens, server-side RBAC + tenant isolation on every scoped query, throttled auth/creation endpoints, escaped exports, masked secrets. Details: [`signalseek/docs/SECURITY.md`](signalseek/docs/SECURITY.md).
+
+## Tests & evaluation
+
