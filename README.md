@@ -173,3 +173,18 @@ Benchmark: [`signalseek/scripts/benchmark.md`](signalseek/scripts/benchmark.md) 
 ## Screenshots
 
 > Add PNGs under `signalseek/docs/assets/` and reference them here — suggested captures:
+> `01-overview.png` (dashboard), `02-investigation.png` (SSE timeline), `03-evidence.png` (claim chain),
+> `04-graph.png` (Cytoscape), `05-report.png` (cited report + export).
+
+## Roadmap
+
+- [x] Vertical slice: auth → plan → bounded run → evidence → cited report → graph → monitors
+- [ ] BullMQ repeat scheduling for monitors (models + endpoints exist; scheduler queues runs)
+- [ ] pgvector embedding backfill for hybrid retrieval scoring
+- [ ] Playwright end-to-end suite wired to demo providers
+- [ ] Rich PDF layout + report diff view
+- [ ] Email alert provider (in-app alerts already live)
+
+## Known limitations
+
+See [`signalseek/docs/KNOWN_LIMITATIONS.md`](signalseek/docs/KNOWN_LIMITATIONS.md): sentence-level extraction, minimal PDF layout, polling scheduler, no email provider by default. Nothing core is faked — gaps are documented, not hidden.
