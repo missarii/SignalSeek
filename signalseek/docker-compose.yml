@@ -53,3 +53,18 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+      agent:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:4000/api/v1/health/live').then(r=>{if(!r.ok)process.exit(1)})"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  web:
+    build: ./apps/web
+    env_file: .env
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:4000
+    ports:
