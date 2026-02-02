@@ -18,3 +18,23 @@ services:
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  agent:
+    build: ./apps/agent
+    env_file: .env
+    environment:
+      AGENT_PORT: 8001
+      DATABASE_URL: postgresql://signalseek:signalseek_pw@postgres:5432/signalseek?schema=public
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "${AGENT_PORT:-8001}:8001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
