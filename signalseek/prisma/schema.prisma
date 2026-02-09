@@ -5,3 +5,17 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum Role { OWNER ADMIN ANALYST VIEWER }
+enum InvestigationStatus { DRAFT QUEUED RUNNING COMPLETED FAILED CANCELLED }
+enum EvidenceStatus { SUPPORTED PARTIALLY_SUPPORTED CONTRADICTED INSUFFICIENT NOT_EVALUATED }
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  members      WorkspaceMember[]
+  refreshTokens RefreshToken[]
