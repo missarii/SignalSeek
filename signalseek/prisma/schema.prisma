@@ -19,3 +19,7 @@ model User {
   updatedAt    DateTime @updatedAt
   members      WorkspaceMember[]
   refreshTokens RefreshToken[]
+  auditLogs    AuditLog[]
+}
+model RefreshToken {
+  id        String   @id @default(uuid())
