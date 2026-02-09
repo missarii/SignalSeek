@@ -39,3 +39,17 @@ model Workspace {
   members       WorkspaceMember[]
   investigations Investigation[]
   reports       Report[]
+  monitors      Monitor[]
+  alerts        Alert[]
+  integrations  Integration[]
+  usage         UsageRecord[]
+  entities      Entity[]
+}
+model WorkspaceMember {
+  id          String   @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        Role     @default(ANALYST)
+  createdAt   DateTime @default(now())
