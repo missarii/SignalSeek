@@ -53,3 +53,13 @@ model WorkspaceMember {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   role        Role     @default(ANALYST)
   createdAt   DateTime @default(now())
+  @@unique([workspaceId, userId])
+  @@index([userId])
+}
+model Investigation {
+  id          String   @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  question    String
+  description String?
+  status      InvestigationStatus @default(DRAFT)
