@@ -180,3 +180,12 @@ model Evidence {
   quote     String
   method    String   @default("extraction")
   result    EvidenceStatus @default(SUPPORTED)
+  createdAt DateTime @default(now())
+  links     ClaimEvidenceLink[]
+  relEvidence RelationshipEvidence[]
+  @@index([passageId])
+}
+model ClaimEvidenceLink {
+  id         String   @id @default(uuid())
+  claimId    String
+  claim      Claim    @relation(fields: [claimId], references: [id], onDelete: Cascade)
