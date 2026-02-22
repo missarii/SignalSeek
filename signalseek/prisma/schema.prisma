@@ -154,3 +154,16 @@ model SourceSnapshot {
   @@index([sourceId])
 }
 model Passage {
+  id        String   @id @default(uuid())
+  sourceId  String
+  source    Source   @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  text      String
+  locator   String?
+  createdAt DateTime @default(now())
+  evidence  Evidence[]
+  @@index([sourceId])
+}
+model Claim {
+  id              String   @id @default(uuid())
+  investigationId String
+  investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
