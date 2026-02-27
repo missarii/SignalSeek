@@ -233,3 +233,14 @@ model Relationship {
   from       Entity   @relation("out", fields: [fromId], references: [id], onDelete: Cascade)
   toId       String
   to         Entity   @relation("in", fields: [toId], references: [id], onDelete: Cascade)
+  type       String   @default("RELATED_TO")
+  createdAt  DateTime @default(now())
+  evidence   RelationshipEvidence[]
+  @@index([fromId])
+  @@index([toId])
+}
+model RelationshipEvidence {
+  id             String   @id @default(uuid())
+  relationshipId String
+  relationship   Relationship @relation(fields: [relationshipId], references: [id], onDelete: Cascade)
+  evidenceId     String
