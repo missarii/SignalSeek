@@ -303,3 +303,18 @@ model MonitorSnapshot {
 }
 model Alert {
   id          String   @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  monitorId   String?
+  title       String
+  detail      String?
+  read        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  @@index([workspaceId])
+}
+model ScheduledRun {
+  id        String   @id @default(uuid())
+  monitorId String
+  monitor   Monitor  @relation(fields: [monitorId], references: [id], onDelete: Cascade)
+  status    String   @default("QUEUED")
+  runAt     DateTime @default(now())
