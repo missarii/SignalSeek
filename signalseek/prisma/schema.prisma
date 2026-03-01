@@ -288,3 +288,18 @@ model Monitor {
   schedule        String   @default("daily")
   paused          Boolean  @default(false)
   createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  snapshots       MonitorSnapshot[]
+  scheduledRuns   ScheduledRun[]
+}
+model MonitorSnapshot {
+  id        String   @id @default(uuid())
+  monitorId String
+  monitor   Monitor  @relation(fields: [monitorId], references: [id], onDelete: Cascade)
+  claimHash String
+  claims    Json     @default("[]")
+  createdAt DateTime @default(now())
+  @@index([monitorId])
+}
+model Alert {
+  id          String   @id @default(uuid())
