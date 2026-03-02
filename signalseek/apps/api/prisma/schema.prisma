@@ -19,3 +19,13 @@ model User {
   updatedAt    DateTime @updatedAt
   members      WorkspaceMember[]
   refreshTokens RefreshToken[]
+  auditLogs    AuditLog[]
+}
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
