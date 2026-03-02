@@ -318,3 +318,27 @@ model ScheduledRun {
   monitor   Monitor  @relation(fields: [monitorId], references: [id], onDelete: Cascade)
   status    String   @default("QUEUED")
   runAt     DateTime @default(now())
+  finishedAt DateTime?
+  error     String?
+}
+model Integration {
+  id          String   @id @default(uuid())
+  workspaceId String?
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  kind        String
+  provider    String
+  status      String   @default("unconfigured")
+  config      Json     @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+model UsageRecord {
+  id          String   @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  kind        String
+  quantity    Float
+  costEstimate Float   @default(0)
+  createdAt   DateTime @default(now())
+  @@index([workspaceId])
+}
