@@ -29,3 +29,20 @@ model RefreshToken {
   expiresAt DateTime
   revokedAt DateTime?
   createdAt DateTime @default(now())
+  @@index([userId])
+}
+model Workspace {
+  id            String   @id @default(uuid())
+  name          String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  members       WorkspaceMember[]
+  investigations Investigation[]
+  reports       Report[]
+  monitors      Monitor[]
+  alerts        Alert[]
+  integrations  Integration[]
+  usage         UsageRecord[]
+  entities      Entity[]
+}
+model WorkspaceMember {
