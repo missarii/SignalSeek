@@ -74,3 +74,12 @@ model Investigation {
   runs        InvestigationRun[]
   queries     SearchQuery[]
   sources     Source[]
+  claims      Claim[]
+  contradictions Contradiction[]
+  reports     Report[]
+  events      InvestigationEvent[]
+  checkpoints AgentCheckpoint[]
+}
+model ResearchPlan {
+  id              String   @id @default(uuid())
+  investigationId String   @unique
