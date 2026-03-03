@@ -83,3 +83,21 @@ model Investigation {
 model ResearchPlan {
   id              String   @id @default(uuid())
   investigationId String   @unique
+  investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+  objective       String
+  subquestions    Json     @default("[]")
+  searchQueries   Json     @default("[]")
+  sourceCategories Json    @default("[]")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+model InvestigationRun {
+  id              String   @id @default(uuid())
+  investigationId String
+  investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+  status          String   @default("RUNNING")
+  round           Int      @default(0)
+  startedAt       DateTime @default(now())
+  finishedAt      DateTime?
+  error           String?
+  tokenUsage      Int      @default(0)
