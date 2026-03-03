@@ -118,3 +118,20 @@ model SearchQuery {
   investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
   query           String
   round           Int      @default(0)
+  provider        String   @default("mock")
+  status          String   @default("COMPLETED")
+  createdAt       DateTime @default(now())
+  @@index([investigationId])
+}
+model Source {
+  id              String   @id @default(uuid())
+  investigationId String?
+  investigation   Investigation? @relation(fields: [investigationId], references: [id], onDelete: SetNull)
+  workspaceId     String?
+  url             String
+  canonicalUrl    String
+  title           String?
+  snippet         String?
+  provider        String   @default("mock")
+  sourceType      String   @default("web")
+  publishedAt     DateTime?
