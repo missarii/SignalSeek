@@ -101,3 +101,20 @@ model InvestigationRun {
   finishedAt      DateTime?
   error           String?
   tokenUsage      Int      @default(0)
+  costEstimate    Float    @default(0)
+  @@index([investigationId])
+}
+model AgentCheckpoint {
+  id              String   @id @default(uuid())
+  investigationId String
+  investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+  state           Json
+  createdAt       DateTime @default(now())
+  @@index([investigationId])
+}
+model SearchQuery {
+  id              String   @id @default(uuid())
+  investigationId String
+  investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+  query           String
+  round           Int      @default(0)
