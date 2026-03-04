@@ -163,3 +163,11 @@ model Passage {
   evidence  Evidence[]
   @@index([sourceId])
 }
+model Claim {
+  id              String   @id @default(uuid())
+  investigationId String
+  investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+  text            String
+  status          EvidenceStatus @default(NOT_EVALUATED)
+  createdAt       DateTime @default(now())
+  evidenceLinks   ClaimEvidenceLink[]
