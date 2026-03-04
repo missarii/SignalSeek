@@ -135,3 +135,16 @@ model Source {
   provider        String   @default("mock")
   sourceType      String   @default("web")
   publishedAt     DateTime?
+  retrievedAt     DateTime @default(now())
+  contentHash     String?
+  author          String?
+  createdAt       DateTime @default(now())
+  snapshots       SourceSnapshot[]
+  passages        Passage[]
+  @@index([investigationId])
+  @@index([canonicalUrl])
+}
+model SourceSnapshot {
+  id        String   @id @default(uuid())
+  sourceId  String
+  source    Source   @relation(fields: [sourceId], references: [id], onDelete: Cascade)
