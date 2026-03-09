@@ -171,3 +171,21 @@ model Claim {
   status          EvidenceStatus @default(NOT_EVALUATED)
   createdAt       DateTime @default(now())
   evidenceLinks   ClaimEvidenceLink[]
+  @@index([investigationId])
+}
+model Evidence {
+  id        String   @id @default(uuid())
+  passageId String
+  passage   Passage  @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  quote     String
+  method    String   @default("extraction")
+  result    EvidenceStatus @default(SUPPORTED)
+  createdAt DateTime @default(now())
+  links     ClaimEvidenceLink[]
+  relEvidence RelationshipEvidence[]
+  @@index([passageId])
+}
+model ClaimEvidenceLink {
+  id         String   @id @default(uuid())
+  claimId    String
+  claim      Claim    @relation(fields: [claimId], references: [id], onDelete: Cascade)
