@@ -202,3 +202,19 @@ model Contradiction {
   claimB          String
   kind            String   @default("genuine")
   explanation     String?
+  createdAt       DateTime @default(now())
+  @@index([investigationId])
+}
+model Entity {
+  id          String   @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name        String
+  normalized  String
+  type        String   @default("Concept")
+  firstSeen   DateTime @default(now())
+  lastSeen    DateTime @default(now())
+  aliases     EntityAlias[]
+  outEdges    Relationship[] @relation("out")
+  inEdges     Relationship[] @relation("in")
+  @@unique([workspaceId, normalized])
