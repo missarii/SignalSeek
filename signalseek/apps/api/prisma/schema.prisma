@@ -189,3 +189,16 @@ model ClaimEvidenceLink {
   id         String   @id @default(uuid())
   claimId    String
   claim      Claim    @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  evidenceId String
+  evidence   Evidence @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+  relation   String   @default("supports")
+  @@unique([claimId, evidenceId])
+}
+model Contradiction {
+  id              String   @id @default(uuid())
+  investigationId String
+  investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+  claimA          String
+  claimB          String
+  kind            String   @default("genuine")
+  explanation     String?
