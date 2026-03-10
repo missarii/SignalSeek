@@ -218,3 +218,16 @@ model Entity {
   outEdges    Relationship[] @relation("out")
   inEdges     Relationship[] @relation("in")
   @@unique([workspaceId, normalized])
+  @@index([workspaceId])
+}
+model EntityAlias {
+  id       String @id @default(uuid())
+  entityId String
+  entity   Entity @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  alias    String
+  @@index([entityId])
+}
+model Relationship {
+  id         String   @id @default(uuid())
+  fromId     String
+  from       Entity   @relation("out", fields: [fromId], references: [id], onDelete: Cascade)
