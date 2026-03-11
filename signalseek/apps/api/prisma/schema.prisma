@@ -247,3 +247,9 @@ model RelationshipEvidence {
   evidence       Evidence @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
   @@unique([relationshipId, evidenceId])
 }
+model Report {
+  id              String   @id @default(uuid())
+  workspaceId     String
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  investigationId String
+  investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
