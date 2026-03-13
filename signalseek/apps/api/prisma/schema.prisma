@@ -342,3 +342,18 @@ model UsageRecord {
   createdAt   DateTime @default(now())
   @@index([workspaceId])
 }
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  workspaceId String?
+  action      String
+  detail      Json     @default("{}")
+  createdAt   DateTime @default(now())
+  @@index([workspaceId])
+}
+model InvestigationEvent {
+  id              String   @id @default(uuid())
+  investigationId String
+  investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+  type            String
