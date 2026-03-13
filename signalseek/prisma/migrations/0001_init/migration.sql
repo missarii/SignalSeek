@@ -1,0 +1,9 @@
+-- SignalSeek initial migration (PostgreSQL + pgvector).
+-- Run: prisma migrate deploy
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+CREATE EXTENSION IF NOT EXISTS "vector";
+
+-- Enums
+DO $$ BEGIN CREATE TYPE "Role" AS ENUM ('OWNER','ADMIN','ANALYST','VIEWER'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE "InvestigationStatus" AS ENUM ('DRAFT','QUEUED','RUNNING','COMPLETED','FAILED','CANCELLED'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE "EvidenceStatus" AS ENUM ('SUPPORTED','PARTIALLY_SUPPORTED','CONTRADICTED','INSUFFICIENT','NOT_EVALUATED'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;

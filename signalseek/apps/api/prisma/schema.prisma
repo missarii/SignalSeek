@@ -357,3 +357,7 @@ model InvestigationEvent {
   investigationId String
   investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
   type            String
+  payload         Json     @default("{}")
+  createdAt       DateTime @default(now())
+  @@index([investigationId])
+}
