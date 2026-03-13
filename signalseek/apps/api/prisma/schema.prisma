@@ -314,3 +314,11 @@ model Alert {
 }
 model ScheduledRun {
   id        String   @id @default(uuid())
+  monitorId String
+  monitor   Monitor  @relation(fields: [monitorId], references: [id], onDelete: Cascade)
+  status    String   @default("QUEUED")
+  runAt     DateTime @default(now())
+  finishedAt DateTime?
+  error     String?
+}
+model Integration {
