@@ -60,3 +60,19 @@ class BraveProvider(SearchProvider):
     name = "brave"
     def __init__(self, api_key: str):
         self.api_key = api_key
+    def is_configured(self) -> bool: return bool(self.api_key)
+    def status_message(self) -> str:
+        return "ready" if self.api_key else "unconfigured: set BRAVE_SEARCH_API_KEY to enable Brave search"
+    async def search(self, query: str, max_results: int = 8) -> list[SearchResult]:
+        if not self.api_key:
+            raise RuntimeError("Brave provider unconfigured: set BRAVE_SEARCH_API_KEY")
+        import httpx
+        async with httpx.AsyncClient(timeout=20) as c:
+            r = await c.get("https://api.search.brave.com/res/v1/web/search",
+                            params={"q": query, "count": max_results},
+                            headers={"X-Subscription-Token": self.api_key, "Accept": "application/json"})
+            r.raise_for_status()
+            data = r.json()
+        out = []
+        for item in ((data.get("web") or {}).get("results") or [])[:max_results]:
+            out.append(SearchResult(provider="brave", title=item.get("title","") or query,
