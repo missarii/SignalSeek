@@ -18,3 +18,18 @@ def canonicalize_url(url: str) -> str:
         query = urlencode(q)
         out = urlunparse((scheme, f"{host}{port}", path, "", query, ""))
         return out
+    except Exception:
+        return url.strip()
+
+def normalize_query(q: str) -> str:
+    q = q.strip().lower()
+    q = re.sub(r"\s+", " ", q)
+    return q
+
+def content_hash(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8", errors="ignore")).hexdigest()
+
+def dedupe_queries(queries: list[str]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for q in queries:
