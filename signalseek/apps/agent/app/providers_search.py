@@ -94,3 +94,11 @@ class RssProvider:
                                     published_at=getattr(e, "published", None), result_type="rss"))
         return out
 
+def build_search_registry(search_provider: str, tavily_key: str, brave_key: str) -> dict[str, SearchProvider]:
+    return {
+        "mock": MockSearchProvider(),
+        "tavily": TavilyProvider(tavily_key),
+        "brave": BraveProvider(brave_key),
+        "default": MockSearchProvider() if search_provider == "mock" else (
+            TavilyProvider(tavily_key) if search_provider == "tavily" else BraveProvider(brave_key)),
+    }
