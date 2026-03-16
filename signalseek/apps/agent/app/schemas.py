@@ -14,3 +14,24 @@ class SearchResult(BaseModel):
 class PlanRequest(BaseModel):
     question: str
     description: str = ""
+    max_rounds: int = 4
+    max_queries: int = 20
+
+class ResearchPlan(BaseModel):
+    objective: str
+    subquestions: list[str] = Field(default_factory=list)
+    search_queries: list[str] = Field(default_factory=list)
+    source_categories: list[str] = Field(default_factory=list)
+
+class RunRequest(BaseModel):
+    investigation_id: str
+    workspace_id: str
+    question: str
+    description: str = ""
+    plan: ResearchPlan | None = None
+    max_rounds: int = 4
+    max_queries: int = 20
+    max_sources: int = 50
+    demo: bool = True
+
+class PassageOut(BaseModel):
