@@ -47,3 +47,13 @@ class ClaimOut(BaseModel):
 
 class RunResult(BaseModel):
     plan: ResearchPlan
+    sources: list[dict] = Field(default_factory=list)
+    claims: list[ClaimOut] = Field(default_factory=list)
+    contradictions: list[dict] = Field(default_factory=list)
+    report_markdown: str = ""
+    citations: list[dict] = Field(default_factory=list)
+    entities: list[dict] = Field(default_factory=list)
+    relationships: list[dict] = Field(default_factory=list)
+    events: list[dict] = Field(default_factory=list)
+    rounds_executed: int = 0
+    queries_issued: int = 0
