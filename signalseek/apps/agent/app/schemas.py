@@ -35,3 +35,15 @@ class RunRequest(BaseModel):
     demo: bool = True
 
 class PassageOut(BaseModel):
+    text: str
+    locator: str = ""
+    source_url: str
+    source_title: str
+
+class ClaimOut(BaseModel):
+    text: str
+    status: Literal["SUPPORTED","PARTIALLY_SUPPORTED","CONTRADICTED","INSUFFICIENT","NOT_EVALUATED"] = "SUPPORTED"
+    evidence: list[PassageOut] = Field(default_factory=list)
+
+class RunResult(BaseModel):
+    plan: ResearchPlan
