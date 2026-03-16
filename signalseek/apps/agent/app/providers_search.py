@@ -76,3 +76,21 @@ class BraveProvider(SearchProvider):
         out = []
         for item in ((data.get("web") or {}).get("results") or [])[:max_results]:
             out.append(SearchResult(provider="brave", title=item.get("title","") or query,
+                                    url=item.get("url",""), snippet=item.get("description","")[:800],
+                                    result_type="web"))
+        return out
+
+class RssProvider:
+    """RSS/Atom ingestion helper (connector-style, feed URLs supplied per call)."""
+    name = "rss"
+    async def fetch_feed(self, feed_url: str, max_items: int = 10) -> list[SearchResult]:
+        import feedparser
+        feed = feedparser.parse(feed_url)
+        out = []
+        for e in (feed.entries or [])[:max_items]:
+            out.append(SearchResult(provider="rss", title=getattr(e, "title", feed_url),
+                                    url=getattr(e, "link", feed_url),
+                                    snippet=(getattr(e, "summary", "") or "")[:800],
+                                    published_at=getattr(e, "published", None), result_type="rss"))
+        return out
+
