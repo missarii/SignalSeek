@@ -27,3 +27,24 @@ class MockSearchProvider(SearchProvider):
             SearchResult(provider="mock", title=f"Demo analysis: {q} — timeline",
                          url=f"https://demo.signalseek.local/analysis/{abs(hash(q+'y')) % 10000}/timeline",
                          snippet=f"Demonstration timeline of events related to {q}.",
+                         result_type="web"),
+        ]
+        return base[:max_results]
+
+class TavilyProvider(SearchProvider):
+    name = "tavily"
+    def __init__(self, api_key: str):
+        self.api_key = api_key
+    def is_configured(self) -> bool: return bool(self.api_key)
+    def status_message(self) -> str:
+        return "ready" if self.api_key else "unconfigured: set TAVILY_API_KEY to enable real web search"
+    async def search(self, query: str, max_results: int = 8) -> list[SearchResult]:
+        if not self.api_key:
+            raise RuntimeError("Tavily provider unconfigured: set TAVILY_API_KEY")
+        import httpx
+        async with httpx.AsyncClient(timeout=20) as c:
+            r = await c.post("https://api.tavily.com/search",
+                             json={"api_key": self.api_key, "query": query, "max_results": max_results,
+                                   "include_answer": False, "search_depth": "advanced"},
+                             headers={"Content-Type": "application/json"})
+            r.raise_for_status()
