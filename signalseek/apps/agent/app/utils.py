@@ -54,3 +54,4 @@ def classify_contradiction(a: str, b: str) -> str:
         return "different-definitions"
     if "not" in al.split() or "not" in bl.split() or "no " in al or "no " in bl:
         return "genuine"
+    return "incomplete-information"
