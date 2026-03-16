@@ -48,3 +48,15 @@ class TavilyProvider(SearchProvider):
                                    "include_answer": False, "search_depth": "advanced"},
                              headers={"Content-Type": "application/json"})
             r.raise_for_status()
+            data = r.json()
+        out = []
+        for item in (data.get("results") or [])[:max_results]:
+            out.append(SearchResult(provider="tavily", title=item.get("title","") or query,
+                                    url=item.get("url",""), snippet=item.get("content","")[:800],
+                                    published_at=item.get("published_date"), author=None, result_type="web"))
+        return out
+
+class BraveProvider(SearchProvider):
+    name = "brave"
+    def __init__(self, api_key: str):
+        self.api_key = api_key
