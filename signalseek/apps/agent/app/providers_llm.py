@@ -32,3 +32,10 @@ class OpenAICompatibleLLM(LLMProvider):
         import httpx
         async with httpx.AsyncClient(timeout=60) as c:
             r = await c.post(f"{self.base_url}/chat/completions",
+                             headers={"Authorization": f"Bearer {self.api_key}"},
+                             json={"model": self.model,
+                                   "messages": [{"role": "system", "content": system},
+                                                {"role": "user", "content": user}],
+                                   "max_tokens": max_tokens, "temperature": 0.2})
+            r.raise_for_status()
+            data = r.json()
