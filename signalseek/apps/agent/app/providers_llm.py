@@ -39,3 +39,20 @@ class OpenAICompatibleLLM(LLMProvider):
                                    "max_tokens": max_tokens, "temperature": 0.2})
             r.raise_for_status()
             data = r.json()
+        return data["choices"][0]["message"]["content"]
+
+class OllamaLLM(LLMProvider):
+    name = "ollama"
+    supports_tools = False
+    supports_json = False
+    def __init__(self, base_url: str, model: str):
+        self.base_url = (base_url or "http://localhost:11434").rstrip("/")
+        self.model = model or "llama3.1"
+    def is_configured(self) -> bool: return bool(self.base_url)
+    async def complete(self, system: str, user: str, max_tokens: int = 2000) -> str:
+        import httpx
+        async with httpx.AsyncClient(timeout=120) as c:
+            r = await c.post(f"{self.base_url}/api/generate",
+                             json={"model": self.model, "prompt": f"{system}\n\n{user}", "stream": False})
+            r.raise_for_status()
+            return r.json().get("response", "")
