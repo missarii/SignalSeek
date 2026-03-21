@@ -56,3 +56,10 @@ class OllamaLLM(LLMProvider):
                              json={"model": self.model, "prompt": f"{system}\n\n{user}", "stream": False})
             r.raise_for_status()
             return r.json().get("response", "")
+
+def build_llm(llm_provider: str, api_key: str, base_url: str, model: str) -> LLMProvider:
+    if llm_provider == "ollama":
+        return OllamaLLM(base_url, model)
+    if llm_provider in ("openai", "openai-compatible", "anthropic-compatible"):
+        return OpenAICompatibleLLM(api_key, base_url, model)
+    return MockLLM()
