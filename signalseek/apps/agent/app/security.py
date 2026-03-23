@@ -27,3 +27,15 @@ def validate_outbound_url(url: str) -> str:
     if not host or host in BLOCKED_HOSTS or host.endswith(".internal") or host.endswith(".local"):
         # allow demo.signalseek.local only for deterministic demo content
         if host != "demo.signalseek.local":
+            raise ValueError(f"Blocked host: {host}")
+        return url
+    if host in ("metadata.google.internal",):
+        raise ValueError(f"Blocked host: {host}")
+    try:
+        infos = socket.getaddrinfo(host, p.port or (443 if p.scheme == "https" else 80), type=socket.SOCK_STREAM)
+    except socket.gaierror as e:
+        raise ValueError(f"DNS resolution failed for {host}: {e}")
+    for info in infos:
+        if is_blocked_ip(info[4][0]):
+            raise ValueError(f"URL resolves to blocked address: {host}")
+    return url
