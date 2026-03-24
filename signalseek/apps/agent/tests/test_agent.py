@@ -17,3 +17,15 @@ def test_ssrf_blocks_loopback():
     with pytest.raises(ValueError):
         validate_outbound_url("http://169.254.169.254/latest/meta-data")
     assert validate_outbound_url("https://demo.signalseek.local/x/y")
+
+def test_chunking_preserves_provenance():
+    chunks = chunk_text("para one\n\npara two\n\npara three", max_chars=20, overlap=3)
+    assert len(chunks) >= 2 and all(c[0].startswith("chunk-") for c in chunks)
+
+def test_plan_validation():
+    import asyncio
+    with pytest.raises(ValueError):
+        asyncio.run(analyze_question("hi", "", 4, 20))
+    plan = asyncio.run(analyze_question("What is the adoption of open RAN in Europe?", "", 4, 20))
+    assert len(plan.subquestions) >= 2 and len(plan.search_queries) >= 2
+
