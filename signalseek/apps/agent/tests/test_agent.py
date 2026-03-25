@@ -29,3 +29,12 @@ def test_plan_validation():
     plan = asyncio.run(analyze_question("What is the adoption of open RAN in Europe?", "", 4, 20))
     assert len(plan.subquestions) >= 2 and len(plan.search_queries) >= 2
 
+def test_contradiction_classification():
+    assert classify_contradiction("Adoption reached 41% globally", "Adoption reached 27% in EU") in (
+        "different-scope", "genuine", "different-reporting-dates", "incomplete-information")
+
+def test_claim_extraction_links_evidence():
+    ps = [PassageOut(text="Adoption of Open RAN reached 41% globally in 2024. Analysts reported growth.", locator="chunk-1", source_url="https://demo.signalseek.local/a", source_title="t")]
+    claims = extract_claims_from_passages(ps)
+    assert claims and claims[0].evidence and claims[0].evidence[0].source_url.startswith("https://")
+
