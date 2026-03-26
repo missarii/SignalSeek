@@ -28,3 +28,18 @@ def extract_demo_content(url: str, query_hint: str) -> tuple[str, str]:
 async def retrieve_text(url: str, query_hint: str = "") -> tuple[str, str, str]:
     """Returns (title, text, method). Raises on blocked/unreachable sources (marked inaccessible, never fabricated)."""
     validate_outbound_url(url)
+    from urllib.parse import urlparse
+    host = (urlparse(url).hostname or "").lower()
+    if host == "demo.signalseek.local":
+        title, body = extract_demo_content(url, query_hint or "the research topic")
+        return title, body, "demo-extractor"
+    import httpx
+    async with httpx.AsyncClient(timeout=FETCH_TIMEOUT, max_redirects=3,
+                                 headers={"User-Agent": "SignalSeek/0.1 (research bot; respects robots)"}) as c:
+        r = await c.get(url)
+        r.raise_for_status()
+        ctype = r.headers.get("content-type", "")
+        if "text" not in ctype and "html" not in ctype and "xml" not in ctype and "json" not in ctype:
+            raise ValueError(f"Unsupported content-type: {ctype}")
+        raw = r.content[:MAX_BYTES]
+    text = raw.decode("utf-8", errors="ignore")
