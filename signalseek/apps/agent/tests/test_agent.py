@@ -38,3 +38,9 @@ def test_claim_extraction_links_evidence():
     claims = extract_claims_from_passages(ps)
     assert claims and claims[0].evidence and claims[0].evidence[0].source_url.startswith("https://")
 
+def test_detect_contradictions_pairs_figures():
+    from app.schemas import ClaimOut
+    cs = [ClaimOut(text="Adoption reached 41% globally in 2024.", evidence=[]),
+          ClaimOut(text="Adoption reached 27% among EU enterprises in 2024.", evidence=[])]
+    out = detect_contradictions(cs)
+    assert out and "41" in out[0]["claim_a"] and out[0]["kind"]
