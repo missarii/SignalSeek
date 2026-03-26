@@ -43,3 +43,17 @@ async def retrieve_text(url: str, query_hint: str = "") -> tuple[str, str, str]:
             raise ValueError(f"Unsupported content-type: {ctype}")
         raw = r.content[:MAX_BYTES]
     text = raw.decode("utf-8", errors="ignore")
+    # Prefer trafilatura for HTML readability; fallback to raw slice.
+    if "<html" in text.lower() or "<article" in text.lower():
+        try:
+            import trafilatura
+            extracted = trafilatura.extract(text, include_comments=False, include_tables=True)
+            if extracted:
+                m = re.search(r"<title>(.*?)</title>", text, re.I | re.S)
+                title = (m.group(1).strip() if m else url)
+                return title, extracted[:20000], "trafilatura"
+        except Exception:
+            pass
+        # BeautifulSoup fallback: strip tags
+        try:
+            from bs4 import BeautifulSoup
