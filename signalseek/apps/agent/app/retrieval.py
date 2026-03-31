@@ -87,3 +87,12 @@ def chunk_text(text: str, max_chars: int = 1200, overlap: int = 200) -> list[tup
                 for i in range(0, len(para), max_chars - overlap):
                     idx += 1
                     chunks.append((f"chunk-{idx}", para[i:i + max_chars - overlap]))
+                buf = ""
+    if buf.strip():
+        idx += 1
+        chunks.append((f"chunk-{idx}", buf.strip()))
+    return chunks[:40]
+
+def content_hash(text: str) -> str:
+    import hashlib
+    return hashlib.sha256(text.encode("utf-8", errors="ignore")).hexdigest()
