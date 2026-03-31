@@ -57,3 +57,17 @@ async def retrieve_text(url: str, query_hint: str = "") -> tuple[str, str, str]:
         # BeautifulSoup fallback: strip tags
         try:
             from bs4 import BeautifulSoup
+            soup = BeautifulSoup(text, "html.parser")
+            title = soup.title.string.strip() if soup.title and soup.title.string else url
+            for tag in soup(["script", "style", "nav", "footer"]):
+                tag.decompose()
+            clean = soup.get_text(separator="\n")
+            clean = re.sub(r"\n{3,}", "\n\n", clean).strip()
+            return title, clean[:20000], "beautifulsoup"
+        except Exception:
+            pass
+    return url, text[:20000], "raw"
+
+def chunk_text(text: str, max_chars: int = 1200, overlap: int = 200) -> list[tuple[str, str]]:
+    """Split into overlapping passages with locators. Returns (locator, passage)."""
+    paras = [p.strip() for p in re.split(r"\n{2,}|\n", text) if p.strip()]
