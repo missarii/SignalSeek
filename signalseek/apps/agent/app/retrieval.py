@@ -71,3 +71,19 @@ async def retrieve_text(url: str, query_hint: str = "") -> tuple[str, str, str]:
 def chunk_text(text: str, max_chars: int = 1200, overlap: int = 200) -> list[tuple[str, str]]:
     """Split into overlapping passages with locators. Returns (locator, passage)."""
     paras = [p.strip() for p in re.split(r"\n{2,}|\n", text) if p.strip()]
+    chunks: list[tuple[str, str]] = []
+    buf = ""
+    idx = 0
+    for para in paras:
+        if len(buf) + len(para) + 1 <= max_chars:
+            buf = (buf + "\n" + para).strip()
+        else:
+            if buf:
+                idx += 1
+                chunks.append((f"chunk-{idx}", buf))
+                buf = buf[-overlap:] + "\n" + para if overlap else para
+            else:
+                # single long paragraph: hard split
+                for i in range(0, len(para), max_chars - overlap):
+                    idx += 1
+                    chunks.append((f"chunk-{idx}", para[i:i + max_chars - overlap]))
