@@ -58,3 +58,15 @@ def detect_contradictions(claims: list[ClaimOut]) -> list[dict]:
 def extract_entities(question: str, passages: list[PassageOut]) -> tuple[list[dict], list[dict]]:
     ents: dict[str, dict] = {}
     def add(name: str, etype: str):
+        key = name.strip().lower()
+        if len(key) < 3 or key in ents:
+            return
+        ents[key] = {"name": name.strip(), "normalized": key, "type": etype}
+    for w in re.findall(r"\b[A-Z][A-Za-z0-9&\-]{2,}(?:\s+[A-Z][A-Za-z0-9&\-]{2,}){0,2}\b", question):
+        add(w, "Concept")
+    for p in passages:
+        for w in re.findall(r"\b[A-Z][A-Za-z0-9&\-]{2,}(?:\s+[A-Z][A-Za-z0-9&\-]{2,}){0,1}\b", p.text):
+            add(w, "Concept")
+    elist = list(ents.values())[:15]
+    rels = []
+    for i in range(min(len(elist) - 1, 6)):
