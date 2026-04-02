@@ -37,3 +37,24 @@ def extract_claims_from_passages(passages: list[PassageOut]) -> list[ClaimOut]:
                 score = 2 if re.search(r"\d+\s*%", s) else (1 if re.search(r"\b20\d\d\b", s) else 0)
                 scored.append((score, s, p))
     scored.sort(key=lambda t: -t[0])
+    for _, s, p in scored[:12]:
+        claims.append(ClaimOut(text=s, status="SUPPORTED", evidence=[p]))
+    return claims
+
+def detect_contradictions(claims: list[ClaimOut]) -> list[dict]:
+    out = []
+    nums = []
+    for i, c in enumerate(claims):
+        for m in re.finditer(r"(\d{1,3})\s*%", c.text):
+            nums.append((i, int(m.group(1)), c.text))
+    for a in range(len(nums)):
+        for b in range(a + 1, len(nums)):
+            if nums[a][1] != nums[b][1]:
+                kind = classify_contradiction(nums[a][2], nums[b][2])
+                out.append({"claim_a": nums[a][2], "claim_b": nums[b][2], "kind": kind,
+                            "explanation": f"Different figures ({nums[a][1]}% vs {nums[b][1]}%): {kind}. Scope/date must be checked; neither auto-preferred."})
+    return out[:5]
+
+def extract_entities(question: str, passages: list[PassageOut]) -> tuple[list[dict], list[dict]]:
+    ents: dict[str, dict] = {}
+    def add(name: str, etype: str):
