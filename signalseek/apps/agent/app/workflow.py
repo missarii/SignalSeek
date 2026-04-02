@@ -70,3 +70,7 @@ def extract_entities(question: str, passages: list[PassageOut]) -> tuple[list[di
     elist = list(ents.values())[:15]
     rels = []
     for i in range(min(len(elist) - 1, 6)):
+        rels.append({"from": elist[i]["normalized"], "to": elist[i + 1]["normalized"],
+                     "type": "MENTIONED_WITH",
+                     "evidence_text": passages[i % max(len(passages), 1)].text[:300] if passages else ""})
+    return elist, rels
