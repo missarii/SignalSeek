@@ -55,3 +55,17 @@ async def run_research(req: RunRequest) -> RunResult:
             for r in results:
                 cu = canonicalize_url(r.url)
                 if cu in seen or len(sources) >= req.max_sources:
+                    continue
+                seen.add(cu)
+                emit("source.discovered", {"url": cu, "title": r.title})
+                try:
+                    title, text, method = await retrieve_text(r.url, q)
+                except Exception as e:
+                    emit("source.extraction_failed", {"url": cu, "error": str(e)[:300]})
+                    continue
+                sources.append({"url": cu, "title": title or r.title,
+                                "snippet": (r.snippet or text[:500]),
+                                "provider": r.provider, "content": text,
+                                "content_hash": content_hash(text),
+                                "published_at": r.published_at, "method": method})
+                emit("source.retrieved", {"url": cu, "chars": len(text), "method": method})
