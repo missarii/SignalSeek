@@ -69,3 +69,18 @@ async def run_research(req: RunRequest) -> RunResult:
                                 "content_hash": content_hash(text),
                                 "published_at": r.published_at, "method": method})
                 emit("source.retrieved", {"url": cu, "chars": len(text), "method": method})
+                for locator, chunk in chunk_text(text):
+                    passages.append(PassageOut(text=chunk, locator=locator, source_url=cu,
+                                               source_title=title or r.title))
+        tmp = extract_claims_from_passages(passages)
+        joined = " ".join(p.text.lower() for p in passages[:20])
+        covered = sum(1 for sq in plan.subquestions if any(w.lower() in joined for w in sq.split()[:3]))
+        emit("research_gap.detected", {"covered": covered, "total": len(plan.subquestions)})
+        if covered < len(plan.subquestions) and rounds < req.max_rounds:
+            fus = [f"{req.question} {(sq.split()[0] if sq.split() else '')}".strip()
+                   for sq in plan.subquestions[covered:covered + 2]]
+            fus = dedupe_queries([f for f in fus if normalize_query(f) not in issued])[:2]
+            pending.extend(fus)
+            if not fus:
+                break
+        else:
