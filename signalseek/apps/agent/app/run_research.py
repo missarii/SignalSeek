@@ -34,3 +34,24 @@ async def run_research(req: RunRequest) -> RunResult:
         if time.time() - t0 > settings.max_investigation_duration_seconds:
             emit("budget.warning", {"reason": "wall-clock budget exhausted"})
             break
+        rounds += 1
+        batch = pending[:5]
+        pending = pending[5:]
+        for q in batch:
+            nq = normalize_query(q)
+            if nq in issued:
+                continue
+            issued.append(nq)
+            if len(issued) > req.max_queries:
+                emit("budget.warning", {"reason": "query budget exhausted"})
+                break
+            emit("search.started", {"query": q, "round": rounds, "provider": provider.name})
+            try:
+                results = await provider.search(q, max_results=5)
+            except Exception as e:
+                emit("search.completed", {"query": q, "error": str(e)[:300]})
+                continue
+            emit("search.completed", {"query": q, "count": len(results)})
+            for r in results:
+                cu = canonicalize_url(r.url)
+                if cu in seen or len(sources) >= req.max_sources:
