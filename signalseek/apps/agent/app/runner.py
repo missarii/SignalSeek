@@ -19,3 +19,13 @@ def synthesize_report(question, claims, contradictions, sources, entities):
         lines.append(f"{len(claims)} evidence-linked claims from {len(sources)} sources; "
                      f"{len(contradictions)} potential conflict(s) flagged for review.")
     else:
+        lines.append("Insufficient evidence: no extractable claims. Stated explicitly.")
+    lines += ["", "## Key findings"]
+    citations = []
+    for i, s in enumerate(sources):
+        citations.append({"key": f"S{i+1}", "url": s["url"], "excerpt": (s.get("snippet") or "")[:300]})
+    for c in claims[:10]:
+        cite = "[S1]"
+        if c.evidence:
+            for j, s in enumerate(sources):
+                if s["url"] == c.evidence[0].source_url:
