@@ -29,3 +29,15 @@ def synthesize_report(question, claims, contradictions, sources, entities):
         if c.evidence:
             for j, s in enumerate(sources):
                 if s["url"] == c.evidence[0].source_url:
+                    cite = f"[S{j+1}]"
+                    break
+        lines.append(f"- {c.text} {cite}")
+    if contradictions:
+        lines += ["", "## Conflicting claims"]
+        for k in contradictions:
+            lines.append(f"- CONFLICT ({k['kind']}): \"{k['claim_a'][:160]}\" vs \"{k['claim_b'][:160]}\".")
+    else:
+        lines += ["", "## Conflicting claims", "No direct numerical conflicts detected."]
+    lines += ["", "## Evidence and citations",
+              "Each claim cites a persisted passage. Automated assessments may be wrong.",
+              "", "## Research limitations",
