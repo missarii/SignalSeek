@@ -41,3 +41,11 @@ def synthesize_report(question, claims, contradictions, sources, entities):
     lines += ["", "## Evidence and citations",
               "Each claim cites a persisted passage. Automated assessments may be wrong.",
               "", "## Research limitations",
+              "- Demo mode uses labeled demonstration sources, not live factual data.",
+              "- Sentence-level extraction may miss nuance; full passages retained.",
+              "", "## Unanswered questions",
+              "- Coverage of every subquestion is listed in the investigation timeline.",
+              "", "## References and retrieval dates"]
+    for c in citations:
+        lines.append(f"- [{c['key']}] {c['url']}")
+    return "\n".join(lines), citations
