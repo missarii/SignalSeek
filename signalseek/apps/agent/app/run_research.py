@@ -19,3 +19,18 @@ async def run_research(req: RunRequest) -> RunResult:
                        "type": type, "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
                        "payload": payload})
     plan = req.plan or await analyze_question(req.question, req.description, req.max_rounds, req.max_queries)
+    emit("plan.created", {"objective": plan.objective, "queries": plan.search_queries})
+    registry = build_search_registry(settings.search_provider, settings.tavily_api_key, settings.brave_search_api_key)
+    provider = registry.get("mock" if req.demo else settings.search_provider, registry["mock"])
+    if not provider.is_configured():
+        raise RuntimeError(provider.status_message())
+    seen: set[str] = set()
+    sources: list[dict] = []
+    passages: list[PassageOut] = []
+    issued: list[str] = []
+    rounds = 0
+    pending = list(plan.search_queries or [req.question])[:req.max_queries]
+    while rounds < req.max_rounds and pending and len(sources) < req.max_sources:
+        if time.time() - t0 > settings.max_investigation_duration_seconds:
+            emit("budget.warning", {"reason": "wall-clock budget exhausted"})
+            break
