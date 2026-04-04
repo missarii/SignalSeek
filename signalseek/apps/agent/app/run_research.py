@@ -84,3 +84,18 @@ async def run_research(req: RunRequest) -> RunResult:
             if not fus:
                 break
         else:
+            break
+    claims = extract_claims_from_passages(passages)
+    for c in claims:
+        emit("claim.extracted", {"text": c.text[:200]})
+        emit("evidence.evaluated", {"claim": c.text[:120], "result": c.status})
+    contradictions = detect_contradictions(claims)
+    for k in contradictions:
+        emit("contradiction.detected", k)
+    entities, relationships = extract_entities(req.question, passages)
+    emit("report.generating", {"claims": len(claims), "sources": len(sources)})
+    report_md, citations = synthesize_report(req.question, claims, contradictions, sources, entities)
+    emit("report.completed", {"citations": len(citations)})
+    emit("investigation.completed", {"rounds": rounds, "queries": len(issued), "sources": len(sources)})
+    return RunResult(plan=plan, sources=sources, claims=claims, contradictions=contradictions,
+                     report_markdown=report_md, citations=citations, entities=entities,
