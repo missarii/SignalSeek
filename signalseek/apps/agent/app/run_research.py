@@ -99,3 +99,5 @@ async def run_research(req: RunRequest) -> RunResult:
     emit("investigation.completed", {"rounds": rounds, "queries": len(issued), "sources": len(sources)})
     return RunResult(plan=plan, sources=sources, claims=claims, contradictions=contradictions,
                      report_markdown=report_md, citations=citations, entities=entities,
+                     relationships=relationships, events=events, rounds_executed=rounds,
+                     queries_issued=len(issued))
