@@ -40,3 +40,17 @@ async def plan(req: PlanRequest, authorization: str | None = Header(default=None
         return (await analyze_question(req.question, req.description, req.max_rounds, req.max_queries)).model_dump()
     except ValueError as e:
         raise HTTPException(400, str(e))
+
+@app.post("/run")
+async def run(req: RunRequest, authorization: str | None = Header(default=None)):
+    check_auth(authorization)
+    try:
+        result = await run_research(req)
+        return result.model_dump()
+    except RuntimeError as e:
+        raise HTTPException(422, str(e))
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+@app.post("/rss/preview")
+async def rss_preview(body: dict, authorization: str | None = Header(default=None)):
