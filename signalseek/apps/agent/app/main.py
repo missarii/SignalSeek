@@ -54,3 +54,12 @@ async def run(req: RunRequest, authorization: str | None = Header(default=None))
 
 @app.post("/rss/preview")
 async def rss_preview(body: dict, authorization: str | None = Header(default=None)):
+    check_auth(authorization)
+    url = (body.get("url") or "").strip()
+    if not url:
+        raise HTTPException(400, "url required")
+    try:
+        items = await RssProvider().fetch_feed(url, max_items=10)
+        return {"items": [i.model_dump() for i in items]}
+    except Exception as e:
+        raise HTTPException(422, f"RSS fetch failed: {e}")
