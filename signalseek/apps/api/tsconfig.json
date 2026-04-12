@@ -1,0 +1,1 @@
+{"compilerOptions": {"module": "commonjs","target": "ES2022","lib": ["ES2022"],"declaration": false,"sourceMap": false,"strict": true,"noImplicitAny": true,"esModuleInterop": true,"skipLibCheck": true,"forceConsistentCasingInFileNames": true,"outDir": "./dist","rootDir": "./src","baseUrl": "./","experimentalDecorators": true,"emitDecoratorMetadata": true},"include": ["src/**/*"]}
