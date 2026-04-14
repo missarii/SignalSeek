@@ -1,0 +1,1 @@
+{"$schema": "https://json-schema.org/draft/2020-12/schema","collection": "Nest CLI","sourceRoot": "src","compilerOptions": {"deleteOutDir": true},"entryFile": "main"}
