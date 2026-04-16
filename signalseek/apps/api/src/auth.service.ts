@@ -12,3 +12,25 @@ export class AuthService {
     if (exists) throw new UnauthorizedException('registration failed');
     const passwordHash = await argon2.hash(password, { type: argon2.argon2id });
     const user = await this.prisma.user.create({
+      data: { email: email.toLowerCase(), passwordHash, name: name || null },
+    });
+    return this.issueTokens(user.id, user.email);
+  }
+  async login(email: string, password: string) {
+    const user = await this.prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+    if (!user || !(await argon2.verify(user.passwordHash, password))) {
+      throw new UnauthorizedException('invalid credentials');
+    }
+    return this.issueTokens(user.id, user.email);
+  }
+  async issueTokens(userId: string, email: string) {
+    const access = await this.jwt.signAsync({ sub: userId, email }, { expiresIn: '15m' });
+    const refresh = newToken();
+    await this.prisma.refreshToken.create({
+      data: { userId, tokenHash: hashToken(refresh), expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 14) },
+    });
+    return { accessToken: access, refreshToken: refresh, user: { id: userId, email } };
+  }
+  async refresh(token: string) {
+    const rec = await this.prisma.refreshToken.findUnique({
+      where: { tokenHash: hashToken(token) }, include: { user: true },
