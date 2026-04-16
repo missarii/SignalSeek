@@ -6,3 +6,7 @@ export function maskSecret(s: string) {
   if (s.length <= 8) return '****';
   return s.slice(0, 3) + '****' + s.slice(-3);
 }
+export function requireEnv(name: string, fallback = '') {
+  const v = (process.env[name] || fallback).trim();
+  return v;
+}
