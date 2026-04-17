@@ -34,3 +34,16 @@ export class AuthService {
   async refresh(token: string) {
     const rec = await this.prisma.refreshToken.findUnique({
       where: { tokenHash: hashToken(token) }, include: { user: true },
+    });
+    if (!rec || rec.revokedAt || rec.expiresAt < new Date()) throw new UnauthorizedException('invalid refresh token');
+    await this.prisma.refreshToken.update({ where: { id: rec.id }, data: { revokedAt: new Date() } });
+    return this.issueTokens(rec.userId, rec.user.email);
+  }
+  async logout(token: string) {
+    await this.prisma.refreshToken.updateMany({
+      where: { tokenHash: hashToken(token), revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+  }
+  async me(userId: string) {
+    return this.prisma.user.findUnique({
