@@ -22,3 +22,23 @@ export class AuthController {
     return out;
   }
   @Post('login') async login(@Body() b: LoginDto, @Res({ passthrough: true }) res: Response) {
+    const out = await this.auth.login(b.email, b.password);
+    this.setRefreshCookie(res, out.refreshToken);
+    return out;
+  }
+  @Post('refresh') async refresh(@Body() b: RefreshDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const tok = b.refreshToken || (req.cookies?.ss_refresh as string);
+    const out = await this.auth.refresh(tok);
+    this.setRefreshCookie(res, out.refreshToken);
+    return out;
+  }
+  @Post('logout') async logout(@Body() b: RefreshDto, @Req() req: Request) {
+    const tok = b.refreshToken || (req.cookies?.ss_refresh as string);
+    if (tok) await this.auth.logout(tok);
+    return { ok: true };
+  }
+  @Get('me') async me(@Req() req: Request) {
+    const h = req.headers.authorization || '';
+    if (!h.startsWith('Bearer ')) return { user: null };
+    try {
+      const [, payload] = h.slice(7).split('.');
