@@ -42,3 +42,8 @@ export class AuthController {
     if (!h.startsWith('Bearer ')) return { user: null };
     try {
       const [, payload] = h.slice(7).split('.');
+      const data = JSON.parse(Buffer.from(payload, 'base64').toString());
+      return { user: await this.auth.me(data.sub) };
+    } catch { return { user: null }; }
+  }
+}
