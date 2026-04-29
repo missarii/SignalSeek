@@ -26,3 +26,11 @@ export class WorkspaceGuard implements CanActivate {
     const req = ctx.switchToHttp().getRequest();
     const wsId = req.params.wsId || req.params.id || req.body?.workspaceId;
     if (!wsId) return true;
+    const m = await this.prisma.workspaceMember.findUnique({
+      where: { workspaceId_userId: { workspaceId: wsId, userId: req.user.sub } },
+    });
+    if (!m) throw new ForbiddenException('not a workspace member');
+    req.membership = m;
+    return true;
+  }
+}
