@@ -37,3 +37,15 @@ export class ApiController {
       where: { userId: req.user.sub }, include: { workspace: true },
     });
     return ms.map((m: any) => ({ id: m.workspace.id, name: m.workspace.name, role: m.role }));
+  }
+  @Post('workspaces') async createWs(@Req() req: any, @Body() b: { name: string }) {
+    const ws = await this.prisma.workspace.create({ data: { name: String(b.name || 'Workspace').slice(0, 200) } });
+    await this.prisma.workspaceMember.create({ data: { workspaceId: ws.id, userId: req.user.sub, role: 'OWNER' } });
+    await this.prisma.auditLog.create({ data: { userId: req.user.sub, workspaceId: ws.id, action: 'workspace.create', detail: { name: ws.name } } });
+    return ws;
+  }
+  @Get('workspaces/:id') @UseGuards(WorkspaceGuard) async getWs(@Param('id') id: string) {
+    return this.prisma.workspace.findUnique({ where: { id } });
+  }
+  @Get('workspaces/:id/members') @UseGuards(WorkspaceGuard) async members(@Param('id') id: string) {
+    return this.prisma.workspaceMember.findMany({
