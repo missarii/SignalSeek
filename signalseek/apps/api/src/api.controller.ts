@@ -69,3 +69,24 @@ export class ApiController {
       await this.prisma.researchPlan.create({
         data: { investigationId: inv.id, objective: plan.objective,
           subquestions: plan.subquestions || [], searchQueries: plan.search_queries || [],
+          sourceCategories: plan.source_categories || [] },
+      });
+      await this.jobs.emit(inv.id, 'plan.created', { objective: plan.objective });
+    } catch {
+      await this.prisma.researchPlan.create({
+        data: { investigationId: inv.id, objective: `Answer: ${b.question}`,
+          subquestions: ['state?', 'figures?', 'disagreements?'], searchQueries: [b.question],
+          sourceCategories: ['web'] },
+      });
+    }
+    await this.jobs.emit(inv.id, 'investigation.created', { question: b.question });
+    this.jobs.enqueueInvestigation(inv.id);
+    return this.prisma.investigation.findUnique({ where: { id: inv.id }, include: { plan: true } });
+  }
+  @Get('workspaces/:wsId/investigations') @UseGuards(WorkspaceGuard)
+  async listInv(@Param('wsId') wsId: string) {
+    return this.prisma.investigation.findMany({
+      where: { workspaceId: wsId }, orderBy: { createdAt: 'desc' }, take: 50, include: { plan: true },
+    });
+  }
+}
