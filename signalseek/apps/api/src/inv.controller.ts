@@ -16,3 +16,25 @@ export class InvController {
     });
     if (!m) return { error: 'forbidden' };
     return inv;
+  }
+  @Post('investigations/:id/cancel') async cancel(@Param('id') id: string, @Req() req: any) {
+    await this.prisma.investigation.update({ where: { id }, data: { status: 'CANCELLED' } });
+    await this.jobs.emit(id, 'investigation.cancelled', { by: req.user.sub });
+    return { ok: true };
+  }
+  @Post('investigations/:id/resume') async resume(@Param('id') id: string) {
+    const inv = await this.prisma.investigation.findUnique({ where: { id } });
+    if (!inv) return { error: 'not found' };
+    if (inv.status === 'COMPLETED') return { ok: true, resumed: false };
+    await this.prisma.investigation.update({ where: { id }, data: { status: 'QUEUED' } });
+    this.jobs.enqueueInvestigation(id);
+    return { ok: true, resumed: true };
+  }
+  @Post('investigations/:id/start') async start(@Param('id') id: string) {
+    await this.prisma.investigation.update({ where: { id }, data: { status: 'QUEUED' } });
+    this.jobs.enqueueInvestigation(id);
+    return { ok: true };
+  }
+  @Get('investigations/:id/events') async events(@Param('id') id: string) {
+    return this.prisma.investigationEvent.findMany({
+      where: { investigationId: id }, orderBy: { createdAt: 'asc' }, take: 500,
