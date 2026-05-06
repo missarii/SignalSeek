@@ -49,3 +49,23 @@ export class ApiController {
   }
   @Get('workspaces/:id/members') @UseGuards(WorkspaceGuard) async members(@Param('id') id: string) {
     return this.prisma.workspaceMember.findMany({
+      where: { workspaceId: id }, include: { user: { select: { email: true, name: true } } },
+    });
+  }
+  @Post('workspaces/:wsId/investigations') @UseGuards(WorkspaceGuard)
+  async createInv(@Param('wsId') wsId: string, @Req() req: any, @Body() b: CreateInvDto) {
+    if ((req.membership.role as string) === 'VIEWER') return { error: 'viewers cannot create investigations' };
+    const inv = await this.prisma.investigation.create({
+      data: {
+        workspaceId: wsId, question: b.question, description: b.description || null,
+        depth: b.depth || 'standard', maxRounds: b.maxRounds ?? 4,
+        maxQueries: b.maxQueries ?? 20, maxSources: b.maxSources ?? 50,
+        createdById: req.user.sub, status: 'QUEUED',
+      },
+    });
+    try {
+      const plan: any = await this.agent.plan({ question: b.question, description: b.description || '',
+        max_rounds: inv.maxRounds, max_queries: inv.maxQueries });
+      await this.prisma.researchPlan.create({
+        data: { investigationId: inv.id, objective: plan.objective,
+          subquestions: plan.subquestions || [], searchQueries: plan.search_queries || [],
