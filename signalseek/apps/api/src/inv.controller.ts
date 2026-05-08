@@ -38,3 +38,14 @@ export class InvController {
   @Get('investigations/:id/events') async events(@Param('id') id: string) {
     return this.prisma.investigationEvent.findMany({
       where: { investigationId: id }, orderBy: { createdAt: 'asc' }, take: 500,
+    });
+  }
+  @Get('investigations/:id/events/stream') async stream(@Param('id') id: string, @Req() req: any) {
+    const res = req.res;
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    let last = 0;
+    const timer = setInterval(async () => {
+      try {
+        const evs = await this.prisma.investigationEvent.findMany({
