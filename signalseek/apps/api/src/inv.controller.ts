@@ -61,3 +61,25 @@ export class InvController {
           clearInterval(timer);
           res.end();
         }
+      } catch { /* keep alive */ }
+    }, 1500);
+    req.on('close', () => clearInterval(timer));
+  }
+  @Get('investigations/:id/sources') async sources(@Param('id') id: string) {
+    return this.prisma.source.findMany({ where: { investigationId: id }, take: 100 });
+  }
+  @Get('investigations/:id/evidence') async evidence(@Param('id') id: string) {
+    const claims = await this.prisma.claim.findMany({
+      where: { investigationId: id },
+      include: { evidenceLinks: { include: { evidence: { include: { passage: { include: { source: true } } } } } } },
+      take: 100,
+    });
+    const contradictions = await this.prisma.contradiction.findMany({ where: { investigationId: id } });
+    return { claims, contradictions };
+  }
+  @Get('investigations/:id/graph') async graph(@Param('id') id: string) {
+    const inv = await this.prisma.investigation.findUnique({ where: { id } });
+    if (!inv) return { nodes: [], edges: [] };
+    const entities = await this.prisma.entity.findMany({ where: { workspaceId: inv.workspaceId }, take: 100 });
+    const rels = await this.prisma.relationship.findMany({
+      where: { from: { workspaceId: inv.workspaceId } }, take: 200,
