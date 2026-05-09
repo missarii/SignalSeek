@@ -83,3 +83,22 @@ export class InvController {
     const entities = await this.prisma.entity.findMany({ where: { workspaceId: inv.workspaceId }, take: 100 });
     const rels = await this.prisma.relationship.findMany({
       where: { from: { workspaceId: inv.workspaceId } }, take: 200,
+      include: { from: true, to: true, evidence: { include: { evidence: true } } },
+    });
+    return {
+      nodes: entities.map((e: any) => ({ id: e.id, label: e.name, type: e.type })),
+      edges: rels.map((r: any) => ({ id: r.id, from: r.fromId, to: r.toId, label: r.type, evidence: r.evidence.length })),
+    };
+  }
+  @Get('sources/:id') async src(@Param('id') id: string) {
+    return this.prisma.source.findUnique({
+      where: { id }, include: { snapshots: true, passages: { include: { evidence: true } } },
+    });
+  }
+  @Get('claims/:id') async claim(@Param('id') id: string) {
+    return this.prisma.claim.findUnique({
+      where: { id },
+      include: { evidenceLinks: { include: { evidence: { include: { passage: { include: { source: true } } } } } } },
+    });
+  }
+}
