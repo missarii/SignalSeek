@@ -49,3 +49,15 @@ export class InvController {
     const timer = setInterval(async () => {
       try {
         const evs = await this.prisma.investigationEvent.findMany({
+          where: { investigationId: id }, orderBy: { createdAt: 'asc' }, take: 500,
+        });
+        for (const e of evs.slice(last)) {
+          res.write(`data: ${JSON.stringify({ id: (e as any).id, type: (e as any).type, payload: (e as any).payload, at: (e as any).createdAt })}\n\n`);
+        }
+        last = evs.length;
+        const inv: any = await this.prisma.investigation.findUnique({ where: { id } });
+        if (inv && ['COMPLETED', 'FAILED', 'CANCELLED'].includes(inv.status)) {
+          res.write(`data: ${JSON.stringify({ type: 'investigation.status', status: inv.status })}\n\n`);
+          clearInterval(timer);
+          res.end();
+        }
