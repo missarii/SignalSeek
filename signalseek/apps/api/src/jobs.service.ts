@@ -36,3 +36,14 @@ export class JobsService {
       if (cur && cur.status !== 'CANCELLED') {
         await this.prisma.investigation.update({ where: { id }, data: { status: 'COMPLETED' } });
       }
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      await this.prisma.investigationRun.update({ where: { id: run.id }, data: { status: 'FAILED', finishedAt: new Date(), error: msg.slice(0, 2000) } });
+      const cur = await this.prisma.investigation.findUnique({ where: { id } });
+      if (cur && cur.status !== 'CANCELLED') {
+        await this.prisma.investigation.update({ where: { id }, data: { status: 'FAILED' } });
+      }
+      await this.emit(id, 'investigation.failed', { error: msg.slice(0, 500) });
+    }
+  }
+}
