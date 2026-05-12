@@ -46,3 +46,21 @@ export async function persistResult(prisma: PrismaService, invId: string, worksp
   for (const c of r.claims || []) {
     const text = String(c.text).slice(0, 2000);
     const found = await prisma.claim.findFirst({ where: { investigationId: invId } });
+    const match = found && found.text.slice(0, 200) === text.slice(0, 200) ? found : null;
+    const cid = match ? match.id : (await prisma.claim.create({
+      data: { investigationId: invId, text, status: 'SUPPORTED' } })).id;
+    for (const e of c.evidence || []) {
+      const pid = passageByUrl.get(e.source_url);
+      if (!pid) continue;
+      const quote = String(e.text).slice(0, 2000);
+      const dup = await prisma.evidence.findFirst({ where: { passageId: pid } });
+      const eid = dup && dup.quote.slice(0, 200) === quote.slice(0, 200) ? dup.id
+        : (await prisma.evidence.create({
+          data: { passageId: pid, quote, method: 'sentence-extraction', result: 'SUPPORTED' } })).id;
+      await prisma.claimEvidenceLink.upsert({
+        where: { claimId_evidenceId: { claimId: cid, evidenceId: eid } },
+        create: { claimId: cid, evidenceId: eid, relation: 'supports' }, update: {},
+      });
+    }
+  }
+  await persistGraphAndReport(prisma, invId, workspaceId, r, urlToId, existing !== null);
