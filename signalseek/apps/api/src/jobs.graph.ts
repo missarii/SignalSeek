@@ -24,3 +24,23 @@ export async function persistGraphAndReport(
         type: String(e.type || 'Concept').slice(0, 100) },
       update: { lastSeen: new Date() },
     });
+    entId.set(norm, up.id);
+  }
+  for (const rel of r.relationships || []) {
+    const a = entId.get(String(rel.from || '').toLowerCase());
+    const b = entId.get(String(rel.to || '').toLowerCase());
+    if (!a || !b) continue;
+    const dup = await prisma.relationship.findFirst({
+      where: { fromId: a, toId: b, type: String(rel.type || 'RELATED_TO') },
+    });
+    const rid = dup ? dup.id : (await prisma.relationship.create({
+      data: { fromId: a, toId: b, type: String(rel.type || 'RELATED_TO').slice(0, 100) } })).id;
+    const firstEv = await prisma.evidence.findFirst({
+      where: { passage: { source: { investigationId: invId } } },
+    });
+    if (firstEv) {
+      await prisma.relationshipEvidence.upsert({
+        where: { relationshipId_evidenceId: { relationshipId: rid, evidenceId: firstEv.id } },
+        create: { relationshipId: rid, evidenceId: firstEv.id }, update: {},
+      });
+    }
