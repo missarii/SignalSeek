@@ -61,3 +61,13 @@ export async function persistGraphAndReport(
     });
     await prisma.reportVersion.create({ data: { reportId: report.id, version: 1, markdown: finalMd } });
     for (const c of r.citations || []) {
+      await prisma.citation.create({
+        data: { reportId: report.id, key: String(c.key), url: c.url || null,
+          sourceId: urlToId.get(c.url) || null, excerpt: String(c.excerpt || '').slice(0, 1000) },
+      });
+    }
+    await prisma.investigationEvent.create({
+      data: { investigationId: invId, type: 'report.completed', payload: { reportId: report.id } },
+    });
+  }
+}
