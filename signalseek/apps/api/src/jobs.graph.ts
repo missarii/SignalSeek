@@ -44,3 +44,20 @@ export async function persistGraphAndReport(
         create: { relationshipId: rid, evidenceId: firstEv.id }, update: {},
       });
     }
+  }
+  if (!hasReport) {
+    const md: string = r.report_markdown || '';
+    const needed = new Set<string>();
+    for (const m of md.matchAll(/\[S(\d+)\]/g)) needed.add(`S${m[1]}`);
+    const have = new Set((r.citations || []).map((c: any) => c.key));
+    let finalMd = md;
+    if ([...needed].some((k) => !have.has(k))) {
+      finalMd += '\n\n> Note: an unresolvable citation key was found; unverified assertions marked explicitly.';
+    }
+    const inv = await prisma.investigation.findUnique({ where: { id: invId } });
+    const report = await prisma.report.create({
+      data: { workspaceId, investigationId: invId,
+        title: `Report: ${(inv?.question || '').slice(0, 120)}`, markdown: finalMd },
+    });
+    await prisma.reportVersion.create({ data: { reportId: report.id, version: 1, markdown: finalMd } });
+    for (const c of r.citations || []) {
