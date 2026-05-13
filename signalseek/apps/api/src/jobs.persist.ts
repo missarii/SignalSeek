@@ -64,3 +64,7 @@ export async function persistResult(prisma: PrismaService, invId: string, worksp
     }
   }
   await persistGraphAndReport(prisma, invId, workspaceId, r, urlToId, existing !== null);
+  await prisma.usageRecord.create({
+    data: { workspaceId, kind: 'search_queries', quantity: r.queries_issued || 0, costEstimate: 0 },
+  });
+}
