@@ -36,3 +36,12 @@ export class OpsController {
       content += 'ET';
       const pdf = `%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 612 792]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>endobj\n5 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj\n4 0 obj<</Length ${content.length}>>stream\n${content}\nendstream\nendobj\ntrailer<</Root 1 0 R>>\n%%EOF`;
       return req.res.send(Buffer.from(pdf));
+    }
+    req.res.setHeader('Content-Type', 'text/markdown');
+    return req.res.send(r.markdown);
+  }
+  @Post('workspaces/:wsId/monitors') @UseGuards(WorkspaceGuard)
+  async createMon(@Param('wsId') wsId: string, @Body() b: { topic: string; query: string; schedule: string }) {
+    if (!['daily', 'weekly'].includes(b.schedule)) return { error: 'schedule must be daily or weekly' };
+    const m = await this.prisma.monitor.create({
+      data: { workspaceId: wsId, topic: b.topic, query: b.query, schedule: b.schedule },
