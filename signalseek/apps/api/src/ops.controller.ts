@@ -24,3 +24,15 @@ export class OpsController {
     const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     if (format === 'html') {
       req.res.setHeader('Content-Type', 'text/html');
+      return req.res.send(`<!doctype html><html><body><h1>${esc(r.title)}</h1><pre>${esc(r.markdown)}</pre></body></html>`);
+    }
+    if (format === 'pdf') {
+      req.res.setHeader('Content-Type', 'application/pdf');
+      const text = r.markdown.replace(/[^\x20-\x7E\n]/g, '?').slice(0, 8000);
+      let content = 'BT /F1 9 Tf 40 780 Td 11 TL ';
+      for (const ln of text.split('\n').slice(0, 120)) {
+        content += `(${(ln || ' ').slice(0, 110).replace(/[()\\]/g, ' ')}) Tj T* `;
+      }
+      content += 'ET';
+      const pdf = `%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 612 792]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>endobj\n5 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj\n4 0 obj<</Length ${content.length}>>stream\n${content}\nendstream\nendobj\ntrailer<</Root 1 0 R>>\n%%EOF`;
+      return req.res.send(Buffer.from(pdf));
