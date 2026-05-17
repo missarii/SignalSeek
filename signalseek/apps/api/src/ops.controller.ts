@@ -65,3 +65,10 @@ export class OpsController {
   }
   @Post('monitors/:id/pause') async pause(@Param('id') id: string) {
     return this.prisma.monitor.update({ where: { id }, data: { paused: true } });
+  }
+  @Post('monitors/:id/resume') async resumeMon(@Param('id') id: string) {
+    return this.prisma.monitor.update({ where: { id }, data: { paused: false } });
+  }
+  @Get('monitors/:id/history') async hist(@Param('id') id: string) {
+    return this.prisma.monitorSnapshot.findMany({ where: { monitorId: id }, orderBy: { createdAt: 'desc' }, take: 30 });
+  }
