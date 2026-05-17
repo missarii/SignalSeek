@@ -45,3 +45,23 @@ export class OpsController {
     if (!['daily', 'weekly'].includes(b.schedule)) return { error: 'schedule must be daily or weekly' };
     const m = await this.prisma.monitor.create({
       data: { workspaceId: wsId, topic: b.topic, query: b.query, schedule: b.schedule },
+    });
+    await this.prisma.scheduledRun.create({ data: { monitorId: m.id, status: 'QUEUED' } });
+    return m;
+  }
+  @Get('workspaces/:wsId/monitors') @UseGuards(WorkspaceGuard)
+  async listMon(@Param('wsId') wsId: string) {
+    return this.prisma.monitor.findMany({ where: { workspaceId: wsId }, orderBy: { createdAt: 'desc' } });
+  }
+  @Get('monitors/:id') async getMon(@Param('id') id: string) {
+    return this.prisma.monitor.findUnique({
+      where: { id },
+      include: { snapshots: { orderBy: { createdAt: 'desc' }, take: 10 },
+        scheduledRuns: { orderBy: { runAt: 'desc' }, take: 20 } },
+    });
+  }
+  @Patch('monitors/:id') async patchMon(@Param('id') id: string, @Body() b: any) {
+    return this.prisma.monitor.update({ where: { id }, data: { topic: b.topic, query: b.query, schedule: b.schedule } });
+  }
+  @Post('monitors/:id/pause') async pause(@Param('id') id: string) {
+    return this.prisma.monitor.update({ where: { id }, data: { paused: true } });
