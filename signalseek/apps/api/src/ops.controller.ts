@@ -72,3 +72,14 @@ export class OpsController {
   @Get('monitors/:id/history') async hist(@Param('id') id: string) {
     return this.prisma.monitorSnapshot.findMany({ where: { monitorId: id }, orderBy: { createdAt: 'desc' }, take: 30 });
   }
+  @Get('workspaces/:wsId/alerts') @UseGuards(WorkspaceGuard)
+  async alerts(@Param('wsId') wsId: string) {
+    return this.prisma.alert.findMany({ where: { workspaceId: wsId }, orderBy: { createdAt: 'desc' }, take: 50 });
+  }
+  @Get('integrations') async integ() {
+    const health = await this.agent.providersHealth();
+    const search = process.env.SEARCH_PROVIDER || 'mock';
+    const llm = process.env.LLM_PROVIDER || 'mock';
+    return {
+      searchProvider: search, llmProvider: llm,
+      tavilyConfigured: Boolean(process.env.TAVILY_API_KEY),
