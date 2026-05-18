@@ -83,3 +83,11 @@ export class OpsController {
     return {
       searchProvider: search, llmProvider: llm,
       tavilyConfigured: Boolean(process.env.TAVILY_API_KEY),
+      braveConfigured: Boolean(process.env.BRAVE_SEARCH_API_KEY),
+      llmConfigured: Boolean(process.env.LLM_API_KEY) || llm === 'mock' || llm === 'ollama',
+      agent: health,
+      note: (!process.env.TAVILY_API_KEY && search !== 'mock')
+        ? 'Real search requested but no API key configured; set TAVILY_API_KEY.' : undefined,
+    };
+  }
+}
