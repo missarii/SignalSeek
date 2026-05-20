@@ -17,3 +17,14 @@ import { JwtAuthGuard, WorkspaceGuard } from './guards';
     JwtModule.register({
       global: true,
       secret: process.env.JWT_ACCESS_SECRET || 'dev-access-secret-change-me-32chars-minimum-please',
+      signOptions: { expiresIn: '15m' },
+    }),
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 120 }]),
+  ],
+  controllers: [AuthController, ApiController, InvController, OpsController],
+  providers: [
+    PrismaService, AuthService, AgentClient, JobsService, JwtAuthGuard, WorkspaceGuard,
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+  ],
+})
+export class AppModule {}
