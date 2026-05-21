@@ -13,3 +13,13 @@ async function main() {
   }
   let ws = await prisma.workspace.findFirst({ where: { name: 'Demo workspace' } });
   if (!ws) {
+    ws = await prisma.workspace.create({ data: { name: 'Demo workspace' } });
+    await prisma.workspaceMember.create({ data: { workspaceId: ws.id, userId: user.id, role: 'OWNER' } });
+  }
+  const invCount = await prisma.investigation.count({ where: { workspaceId: ws.id } });
+  if (invCount === 0) {
+    const inv = await prisma.investigation.create({
+      data: { workspaceId: ws.id, question: 'What is the adoption of open RAN among European telecom operators?',
+        description: 'Seeded demonstration investigation (labeled demo content).',
+        status: 'COMPLETED', createdById: user.id },
+    });
