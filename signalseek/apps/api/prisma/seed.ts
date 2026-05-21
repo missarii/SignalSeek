@@ -23,3 +23,13 @@ async function main() {
         description: 'Seeded demonstration investigation (labeled demo content).',
         status: 'COMPLETED', createdById: user.id },
     });
+    await prisma.researchPlan.create({
+      data: { investigationId: inv.id, objective: `Answer: ${inv.question}`,
+        subquestions: ['current state?', 'figures and scopes?', 'disagreements?'],
+        searchQueries: [inv.question], sourceCategories: ['web', 'dataset'] },
+    });
+    const s1 = await prisma.source.create({
+      data: { investigationId: inv.id, workspaceId: ws.id, url: 'https://demo.signalseek.local/briefing/1/overview',
+        canonicalUrl: 'https://demo.signalseek.local/briefing/1/overview',
+        title: 'Demo briefing overview', snippet: 'Demonstration content.', provider: 'mock', contentHash: 'demo1' },
+    });
