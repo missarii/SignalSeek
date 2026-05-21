@@ -33,3 +33,18 @@ async function main() {
         canonicalUrl: 'https://demo.signalseek.local/briefing/1/overview',
         title: 'Demo briefing overview', snippet: 'Demonstration content.', provider: 'mock', contentHash: 'demo1' },
     });
+    const s2 = await prisma.source.create({
+      data: { investigationId: inv.id, workspaceId: ws.id, url: 'https://demo.signalseek.local/dataset/2/figures',
+        canonicalUrl: 'https://demo.signalseek.local/dataset/2/figures',
+        title: 'Demo dataset figures', snippet: 'Demonstration content.', provider: 'mock', contentHash: 'demo2' },
+    });
+    for (const [s, txt] of [[s1, 'Adoption of open RAN reached 41% globally in 2024.'], [s2, 'Adoption of open RAN reached 27% among EU enterprises in 2024.']] as const) {
+      const p = await prisma.passage.create({ data: { sourceId: s.id, text: txt, locator: 'chunk-1' } });
+      const ev = await prisma.evidence.create({ data: { passageId: p.id, quote: txt, method: 'seed', result: 'SUPPORTED' } });
+      const cl = await prisma.claim.create({ data: { investigationId: inv.id, text: txt, status: 'SUPPORTED' } });
+      await prisma.claimEvidenceLink.create({ data: { claimId: cl.id, evidenceId: ev.id, relation: 'supports' } });
+    }
+    await prisma.contradiction.create({
+      data: { investigationId: inv.id,
+        claimA: 'Adoption of open RAN reached 41% globally in 2024.',
+        claimB: 'Adoption of open RAN reached 27% among EU enterprises in 2024.',
