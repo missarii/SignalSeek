@@ -48,3 +48,23 @@ async function main() {
       data: { investigationId: inv.id,
         claimA: 'Adoption of open RAN reached 41% globally in 2024.',
         claimB: 'Adoption of open RAN reached 27% among EU enterprises in 2024.',
+        kind: 'different-scope',
+        explanation: 'Different geographic scopes (global vs EU enterprises); neither auto-preferred.' },
+    });
+    const e1 = await prisma.entity.upsert({
+      where: { workspaceId_normalized: { workspaceId: ws.id, normalized: 'open ran' } },
+      create: { workspaceId: ws.id, name: 'Open RAN', normalized: 'open ran', type: 'Technology' },
+      update: {},
+    });
+    const e2 = await prisma.entity.upsert({
+      where: { workspaceId_normalized: { workspaceId: ws.id, normalized: 'european telecom operators' } },
+      create: { workspaceId: ws.id, name: 'European telecom operators', normalized: 'european telecom operators', type: 'Organization' },
+      update: {},
+    });
+    const rel = await prisma.relationship.create({ data: { fromId: e1.id, toId: e2.id, type: 'ADOPTED_BY' } });
+    const firstEv = await prisma.evidence.findFirst({ where: { passage: { sourceId: s1.id } } });
+    if (firstEv) await prisma.relationshipEvidence.create({ data: { relationshipId: rel.id, evidenceId: firstEv.id } });
+    const md = `# Intelligence Report (Demo)\n\n**Research question:** ${inv.question}\n\n## Key findings\n- Adoption of open RAN reached 41% globally in 2024. [S1]\n- Adoption of open RAN reached 27% among EU enterprises in 2024. [S2]\n\n## Conflicting claims\n- CONFLICT (different-scope): global 41% vs EU 27%. Scopes differ; neither auto-preferred.\n\n## References and retrieval dates\n- [S1] https://demo.signalseek.local/briefing/1/overview\n- [S2] https://demo.signalseek.local/dataset/2/figures\n`;
+    const rep = await prisma.report.create({ data: { workspaceId: ws.id, investigationId: inv.id, title: `Report: ${inv.question.slice(0, 80)}`, markdown: md } });
+    await prisma.reportVersion.create({ data: { reportId: rep.id, version: 1, markdown: md } });
+    await prisma.citation.create({ data: { reportId: rep.id, key: 'S1', url: s1.canonicalUrl, sourceId: s1.id, excerpt: 'Adoption ... 41% globally' } });
