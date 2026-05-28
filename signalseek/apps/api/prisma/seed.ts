@@ -68,3 +68,12 @@ async function main() {
     const rep = await prisma.report.create({ data: { workspaceId: ws.id, investigationId: inv.id, title: `Report: ${inv.question.slice(0, 80)}`, markdown: md } });
     await prisma.reportVersion.create({ data: { reportId: rep.id, version: 1, markdown: md } });
     await prisma.citation.create({ data: { reportId: rep.id, key: 'S1', url: s1.canonicalUrl, sourceId: s1.id, excerpt: 'Adoption ... 41% globally' } });
+    await prisma.citation.create({ data: { reportId: rep.id, key: 'S2', url: s2.canonicalUrl, sourceId: s2.id, excerpt: 'Adoption ... 27% EU' } });
+    const mon = await prisma.monitor.create({ data: { workspaceId: ws.id, topic: 'Open RAN adoption', query: 'open RAN adoption Europe', schedule: 'weekly' } });
+    await prisma.monitorSnapshot.create({ data: { monitorId: mon.id, claimHash: 'demo-hash-1', claims: ['41% global', '27% EU'] } });
+    await prisma.alert.create({ data: { workspaceId: ws.id, monitorId: mon.id, title: 'Demo alert: baseline established', detail: 'Seeded demonstration alert.' } });
+    console.log('seeded demo workspace');
+  }
+}
+
+main().finally(() => prisma.$disconnect());
