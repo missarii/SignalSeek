@@ -9,3 +9,6 @@
 ## Project status
 
 - Milestones 1–10 implemented as a working vertical slice: auth → workspace → plan → bounded agent run → persisted evidence → cited report → graph → monitors.
+- Verified earlier in this session: agent `pytest` 8/8 green; deterministic demo run produced 10 sources, 12 claims, 5 `different-scope` contradictions, 10 citations; `tsc --noEmit` clean for API and web; API `tsc` build emitted `dist/`.
+- Remaining before claiming production: wire Redis/BullMQ repeat scheduling for monitors (models + endpoints exist, scheduler currently creates QUEUED runs), pgvector embedding backfill, Playwright E2E run.
+
