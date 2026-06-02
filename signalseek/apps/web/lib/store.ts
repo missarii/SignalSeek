@@ -24,3 +24,9 @@ export const useStore = create<Store>((set, get) => ({
       headers: { 'Content-Type': 'application/json', ...(tok ? { Authorization: `Bearer ${tok}` } : {}), ...(init.headers || {}) },
     });
     const ct = r.headers.get('content-type') || '';
+    if (ct.includes('text/') || ct.includes('pdf')) return r.blob();
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error((data as any)?.message || JSON.stringify(data).slice(0, 300));
+    return data;
+  },
+}));
