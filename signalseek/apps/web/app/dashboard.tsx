@@ -49,3 +49,21 @@ export function Dashboard() {
     setDetail({ inv, ev, src });
     const s = new EventSource(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/investigations/${id}/events/stream`);
     const acc: any[] = [];
+    s.onmessage = (m) => { try { acc.push(JSON.parse((m as MessageEvent).data)); setEvents([...acc]); } catch {} };
+    (window as any)._es?.close(); (window as any)._es = s;
+  };
+  const openReport = async (id: string) => setDetail({ report: await api(`/reports/${id}`) });
+
+  return (
+    <main className="space-y-6">
+      <header className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-indigo-300">SignalSeek</h1>
+        <div className="flex gap-2 text-sm items-center">
+          <span className="text-slate-400">{email || ''}</span>
+          <button className="px-2 py-1 rounded bg-slate-800" onClick={() => setSession({ accessToken: null })}>Logout</button>
+        </div>
+      </header>
+      {msg && <p className="text-sm text-amber-300">{msg}</p>}
+      <section className="p-4 rounded bg-slate-900 border border-slate-800 space-y-2">
+        <h2 className="font-semibold">New investigation</h2>
+        <div className="flex gap-2 flex-wrap">
