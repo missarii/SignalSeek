@@ -30,3 +30,22 @@ export function Dashboard() {
   };
   useEffect(() => { load(); }, [workspaceId]);
   const createWs = async () => {
+    const w = await api('/workspaces', { method: 'POST', body: JSON.stringify({ name: 'Demo workspace' }) });
+    setSession({ workspaceId: w.id }); load();
+  };
+  const startInv = async () => {
+    const wid = workspaceId || ws[0]?.id;
+    if (!wid) { setMsg('create a workspace first'); return; }
+    const inv = await api(`/workspaces/${wid}/investigations`, {
+      method: 'POST', body: JSON.stringify({ question: q, maxRounds: 4, maxQueries: 20, maxSources: 50 }),
+    });
+    setMsg(`investigation ${inv.id} queued (demo providers)`);
+    load();
+  };
+  const openInv = async (id: string) => {
+    const [inv, ev, src] = await Promise.all([
+      api(`/investigations/${id}`), api(`/investigations/${id}/evidence`), api(`/investigations/${id}/sources`),
+    ]);
+    setDetail({ inv, ev, src });
+    const s = new EventSource(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/investigations/${id}/events/stream`);
+    const acc: any[] = [];
