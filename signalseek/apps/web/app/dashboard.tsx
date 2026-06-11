@@ -67,3 +67,14 @@ export function Dashboard() {
       <section className="p-4 rounded bg-slate-900 border border-slate-800 space-y-2">
         <h2 className="font-semibold">New investigation</h2>
         <div className="flex gap-2 flex-wrap">
+          <input className="flex-1 min-w-[240px] p-2 rounded bg-slate-950 border border-slate-700" value={q} onChange={(e) => setQ(e.target.value)} />
+          <button className="px-4 py-2 rounded bg-indigo-600" onClick={startInv}>Start</button>
+          <button className="px-4 py-2 rounded bg-slate-700" onClick={createWs}>New workspace</button>
+        </div>
+        {integ && <p className="text-xs text-slate-500">search={integ.searchProvider} llm={integ.llmProvider} {integ.note || ''}</p>}
+      </section>
+      <div className="grid md:grid-cols-2 gap-4">
+        <section className="p-4 rounded bg-slate-900 border border-slate-800">
+          <h2 className="font-semibold mb-2">Investigations ({invs.length})</h2>
+          <ul className="space-y-1 text-sm">
+            {invs.map((i: any) => (
