@@ -78,3 +78,15 @@ export function Dashboard() {
           <h2 className="font-semibold mb-2">Investigations ({invs.length})</h2>
           <ul className="space-y-1 text-sm">
             {invs.map((i: any) => (
+              <li key={i.id}>
+                <button className="text-left hover:text-indigo-300" onClick={() => openInv(i.id)}>
+                  [{i.status}] {String(i.question).slice(0, 90)}
+                </button>
+              </li>
+            ))}
+            {invs.length === 0 && <li className="text-slate-500">No investigations yet.</li>}
+          </ul>
+        </section>
+        <section className="p-4 rounded bg-slate-900 border border-slate-800">
+          <h2 className="font-semibold mb-2">Reports ({reports.length})</h2>
+          <ul className="space-y-1 text-sm">
