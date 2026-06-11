@@ -90,3 +90,16 @@ export function Dashboard() {
         <section className="p-4 rounded bg-slate-900 border border-slate-800">
           <h2 className="font-semibold mb-2">Reports ({reports.length})</h2>
           <ul className="space-y-1 text-sm">
+            {reports.map((r: any) => (
+              <li key={r.id}><button className="hover:text-indigo-300" onClick={() => openReport(r.id)}>{r.title}</button></li>
+            ))}
+            {reports.length === 0 && <li className="text-slate-500">No reports yet.</li>}
+          </ul>
+        </section>
+      </div>
+      <DetailPanels detail={detail} events={events} />
+      <MonitorsPanel workspaceId={workspaceId || ws[0]?.id || null} />
+      {ws.length > 0 && <p className="text-xs text-slate-600">workspace: {ws[0]?.name}</p>}
+    </main>
+  );
+}
