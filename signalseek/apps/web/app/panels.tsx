@@ -36,3 +36,11 @@ export function DetailPanels({ detail, events }: { detail: any; events: any[] })
             {detail.ev.claims.map((c: any) => <li key={c.id}>• {c.text} [{c.evidenceLinks.length} evidence]</li>)}
           </ul>
           <h3 className="text-sm font-semibold">Contradictions ({detail.ev.contradictions.length})</h3>
+          <ul className="text-xs text-amber-200">
+            {detail.ev.contradictions.map((k: any) => <li key={k.id}>[{k.kind}] {String(k.claimA).slice(0, 120)}</li>)}
+          </ul>
+        </section>
+      )}
+    </div>
+  );
+}
