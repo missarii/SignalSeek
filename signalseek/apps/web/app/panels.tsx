@@ -24,3 +24,15 @@ export function DetailPanels({ detail, events }: { detail: any; events: any[] })
         </section>
       )}
       {detail?.inv && (
+        <section className="p-4 rounded bg-slate-900 border border-slate-800 space-y-2">
+          <h2 className="font-semibold">[{detail.inv.status}] {detail.inv.question}</h2>
+          <p className="text-xs text-slate-500">Objective: {detail.inv.plan?.objective}</p>
+          <h3 className="text-sm font-semibold">Sources ({detail.src.length})</h3>
+          <ul className="text-xs text-slate-400">
+            {detail.src.map((s: any) => <li key={s.id}>{s.title} — {s.canonicalUrl}</li>)}
+          </ul>
+          <h3 className="text-sm font-semibold">Claims ({detail.ev.claims.length})</h3>
+          <ul className="text-xs text-slate-300 space-y-1">
+            {detail.ev.claims.map((c: any) => <li key={c.id}>• {c.text} [{c.evidenceLinks.length} evidence]</li>)}
+          </ul>
+          <h3 className="text-sm font-semibold">Contradictions ({detail.ev.contradictions.length})</h3>
