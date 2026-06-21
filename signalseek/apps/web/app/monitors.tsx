@@ -46,3 +46,9 @@ export function MonitorsPanel({ workspaceId }: { workspaceId: string | null }) {
   );
 }
 
+function GraphLoader({ onLoad }: { onLoad: (id: string) => void }) {
+  const [id, setId] = useState('');
+  return (
+    <div className="flex gap-2">
+      <input className="flex-1 p-2 rounded bg-slate-950 border border-slate-700 text-sm" placeholder="investigation id" value={id} onChange={(e) => setId(e.target.value)} />
+      <button className="px-3 py-1.5 rounded bg-slate-700 text-sm" onClick={() => id && onLoad(id)}>Load</button>
