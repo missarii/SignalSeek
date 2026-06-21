@@ -30,3 +30,19 @@ export function MonitorsPanel({ workspaceId }: { workspaceId: string | null }) {
         <div className="flex gap-2">
           <button className="px-3 py-1.5 rounded bg-indigo-600 text-sm" onClick={create}>Create (weekly)</button>
           <button className="px-3 py-1.5 rounded bg-slate-700 text-sm" onClick={load}>Refresh</button>
+        </div>
+        <ul className="text-sm space-y-1">
+          {monitors.map((m: any) => <li key={m.id} className="text-slate-300">{m.paused ? '[paused]' : '[active]'} {m.topic} — {m.schedule}</li>)}
+          {monitors.length === 0 && <li className="text-slate-500 text-sm">No monitors yet.</li>}
+        </ul>
+      </section>
+      <section className="p-4 rounded bg-slate-900 border border-slate-800 space-y-2">
+        <h2 className="font-semibold">Knowledge graph</h2>
+        <p className="text-xs text-slate-500">Every edge links to persisted evidence. Paste an investigation ID to visualize.</p>
+        <GraphLoader onLoad={loadGraph} />
+        <GraphView nodes={graph.nodes} edges={graph.edges} />
+      </section>
+    </div>
+  );
+}
+
